@@ -32,6 +32,7 @@ class ProcessadorCache:
         self.intervaloAleatoriedadePalavras = None
         self.quantidadeDeLinhas = 0
         self.palavrasPorLinha = 0
+        self.indiceSubstituicao = 0
     
     def constroi(self):
 
@@ -39,18 +40,30 @@ class ProcessadorCache:
 
 class LinhaCache:
 
-        def __init__(self, processadorCache: ProcessadorCache):
+    def __init__(self, processadorCache: ProcessadorCache):
 
-            self.sendoUsada = False
-            self.tag = -1
-            self.estadoMesif = EstadoMesif.EMPTY
-            self.palavras = Palavra(processadorCache.intervaloAleatoriedadePalavras) * processadorCache.palavrasPorLinha
+        self.sendoUsada = False
+        self.tag = -1
+        self.estadoMesif = EstadoMesif.EMPTY
+        self.palavras = Palavra(processadorCache.intervaloAleatoriedadePalavras) * processadorCache.palavrasPorLinha
+
+class ConjuntoProcessadoresCaches:
+
+    def __init__(self):
+        
+        self.quantidadeProcCaches = 0
+        self.procCaches = None
+    
+    def constroi(self):
+
+        self.procCaches = [ProcessadorCache()] * self.quantidadeProcCaches
 
 class MemoriaPrincipal:
 
     def __init__(self):
 
         self.blocos = None
+        self.intervaloAleatoriedadePalavras = None
         self.quantidadeDeBlocos = 0
         self.palavrasPorBloco = 0
 
@@ -60,7 +73,7 @@ class MemoriaPrincipal:
 
 class BlocoMp:
 
-    def __init__(self):
+    def __init__(self, memoriaPrincipal: MemoriaPrincipal):
 
-        self.palavras = None
-        self.quantidadeDePalavras = 0
+        self.sendoUsada = False
+        self.palavras = [Palavra(memoriaPrincipal.intervaloAleatoriedadePalavras)] * memoriaPrincipal.palavrasPorBloco
