@@ -1,5 +1,7 @@
 from entidades import *
 
+# PROCESSOS GERAIS - CACHE E MEMORIA PRINCIPAL /////////////////////////////////////////////////////////////////////////////////////////////
+
 def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, endereco: int, indiceProcCacheRequisitante: int):
 
     palavrasPorLinha = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante].palavrasPorLinha
@@ -19,28 +21,62 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     
     # TODO: Exibir Cache Miss
     indiceProcCacheAtual = 0
-    encontrouLinhaForward = False
-    while (not encontrouLinhaForward) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
+    encontrouLinhaEmOutraCache = False
+    while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
 
         if indiceProcCacheAtual != indiceProcCacheRequisitante:
 
-            linhaAlvoProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual])
-            if linhaAlvoProcCacheAtual.estadoMesif == EstadoMesif.FORWARD:
+            linhaProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual])
+            estadoMesifAtual: EstadoMesif = linhaProcCacheAtual.estadoMesif
+            if (estadoMesifAtual == EstadoMesif.FORWARD) or (estadoMesifAtual == EstadoMesif.MODIFIED) or (estadoMesifAtual == EstadoMesif.EXCLUSIVE):
 
-                encontrouLinhaForward = True
-                linhaForward = linhaAlvoProcCacheAtual
+                encontrouLinhaEmOutraCache = True
+                linhaEncontradaEmOutraCache = linhaProcCacheAtual
     
-    if encontrouLinhaForward:
+    if encontrouLinhaEmOutraCache:
 
         if linhaComTagCorrespondente == None:
 
-            copiaLinha(linhaForward, procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao], procCacheRequisitante.palavrasPorLinha)
-            procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao].estadoMesif = EstadoMesif.SHARED
+            copiaLinha(linhaEncontradaEmOutraCache, procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao], procCacheRequisitante.palavrasPorLinha)
+
+            if linhaEncontradaEmOutraCache.estadoMesif == EstadoMesif.FORWARD:
+
+                procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao].estadoMesif = EstadoMesif.SHARED
+            else:
+
+                procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao].estadoMesif = EstadoMesif.FORWARD
+
+            palavraLida = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao].palavras[indicePalavra]
+
+            atualizaIndiceDeSubstituicao(procCacheRequisitante)
+
+        else:
+
+            copiaLinha(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha)
             
-            procCacheRequisitante.indiceSubstituicao += 1
-            if procCacheRequisitante.indiceSubstituicao == procCacheRequisitante.quantidadeDeLinhas:
-                
-                procCacheRequisitante.indiceSubstituicao = 0
+            if linhaEncontradaEmOutraCache.estadoMesif == EstadoMesif.FORWARD:
+
+                linhaComTagCorrespondente.estadoMesif = EstadoMesif.SHARED
+            else:
+
+                linhaComTagCorrespondente.estadoMesif = EstadoMesif.FORWARD
+
+            palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
+        
+        if linhaEncontradaEmOutraCache.estadoMesif == EstadoMesif.MODIFIED:
+
+            #TODO: Escrever na MP (write-back)
+            pass
+        if linhaEncontradaEmOutraCache.estadoMesif != EstadoMesif.FORWARD:
+
+            linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
+    else:
+        #TODO: Ler da MP
+        pass
+    
+    return palavraLida
+
+# PROCESSOS CACHE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 def buscaLinhaCache(procCache: ProcessadorCache, tag) -> LinhaCache:
 
@@ -61,9 +97,33 @@ def copiaLinha(linhaFonte: LinhaCache, linhaDestino: LinhaCache, tamanhoLinha: i
     linhaDestino.tag = linhaFonte.tag
     linhaDestino.sendoUsada = linhaFonte.sendoUsada
 
-    for indicePalvraAtual in range(tamanhoLinha):
-        
-        copiaPalavra(linhaFonte.palavras[indicePalvraAtual], linhaDestino.palavras[indicePalvraAtual])
+    copiaVetorDePalavras(linhaFonte.palavras, linhaDestino.palavras)
+
+def atualizaIndiceDeSubstituicao(procCache: ProcessadorCache):
+
+    procCache.indiceSubstituicao += 1
+    if procCache.indiceSubstituicao == procCache.quantidadeDeLinhas:
+
+        procCache.indiceSubstituicao = 0
+
+# PROCESSOS MEMÓRIA PRINCIPAL //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+def lerBlocoMemoriaPrincipal(memoriaPrincipal: MemoriaPrincipal, endereco: int):
+
+    #TODO: Exibir leitura na memória principal
+
+    palavrasPorBloco = memoriaPrincipal.palavrasPorBloco
+    indiceBloco = endereco//palavrasPorBloco
+
+    return memoriaPrincipal.blocos[indiceBloco]
+
+# PROCESSOS USADOS TANTO EM CACHE QUANTO EM MEMÓRIA PRINCIPAL //////////////////////////////////////////////////////////////////////////////
+
+def copiaVetorDePalavras(vetorDePalavrasFonte: list[Palavra], vetorDePalavrasDestino: list[Palavra], tamanhoVetorDePalavras):
+
+    for indicePalavraAtual in range(tamanhoVetorDePalavras):
+
+        copiaPalavra(vetorDePalavrasFonte[indicePalavraAtual], vetorDePalavrasDestino[indicePalavraAtual])
 
 def copiaPalavra(palavraFonte: Palavra, palavraDestino: Palavra):
 
