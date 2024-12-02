@@ -1,5 +1,5 @@
 from enum import Enum, auto
-import random
+from random import randint
 
 class EstadoMesif(Enum):
 
@@ -8,20 +8,43 @@ class EstadoMesif(Enum):
     SHARED = 2
     INVALID = 3
     FORWARD = 4
+    EMPTY = 5
+
+class Intervalo:
+
+    def __init__(self, inicio, fim):
+        
+        self.inicio = inicio
+        self.fim = fim
+
+class Palavra:
+
+    def __init__(self, intervaloAleatoriedade: Intervalo):
+
+        self.sendoUsada = False
+        self.conteudo = randint(intervaloAleatoriedade.inicio, intervaloAleatoriedade.fim)
 
 class ProcessadorCache:
     
     def __init__(self):
         
         self.linhas = None
+        self.intervaloAleatoriedadePalavras = None
         self.quantidadeDeLinhas = 0
+        self.palavrasPorLinha = 0
     
-    class LinhaCache:
+    def constroi(self):
 
-        def __init__(self):
+        self.linhas = [LinhaCache(self)] * self.quantidadeDeLinhas
 
-            self.palavras = None
-            self.quantidadeDePalavras = 0
+class LinhaCache:
+
+        def __init__(self, processadorCache: ProcessadorCache):
+
+            self.sendoUsada = False
+            self.tag = -1
+            self.estadoMesif = EstadoMesif.EMPTY
+            self.palavras = Palavra(processadorCache.intervaloAleatoriedadePalavras) * processadorCache.palavrasPorLinha
 
 class MemoriaPrincipal:
 
@@ -30,24 +53,14 @@ class MemoriaPrincipal:
         self.blocos = None
         self.quantidadeDeBlocos = 0
         self.palavrasPorBloco = 0
-    
-    def setQuantidadeDeBlocos(self, quantidade):
-
-        self.quantidadeDeBlocos = quantidade
-
-    def setPalavrasPorBloco(self, palavrasPorBloco):
-
-        self.palavrasPorBloco = palavrasPorBloco
 
     def constroi(self):
-
-        if(self.quantidadeDeBlocos != 0):
             
-            self.blocos = [self.BlocoMp()] * self.quantidadeDeBlocos
+        self.blocos = [BlocoMp()] * self.quantidadeDeBlocos
 
-    class BlocoMp:
+class BlocoMp:
 
-        def __init__(self):
+    def __init__(self):
 
-            self.palavras = None
-            self.quantidadeDePalavras = 0
+        self.palavras = None
+        self.quantidadeDePalavras = 0
