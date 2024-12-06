@@ -4,6 +4,8 @@ from entidades import *
 
 def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, endereco: int, indiceProcCacheRequisitante: int):
 
+    # Cálculo de tag e índice da palavra a ser lida dentro da linha da cache
+
     palavrasPorLinha = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante].palavrasPorLinha
     tag = endereco//palavrasPorLinha
     indicePalavra = endereco % palavrasPorLinha
@@ -11,28 +13,43 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     procCacheRequisitante = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
     linhaComTagCorrespondente = buscaLinhaCache(procCacheRequisitante, tag)
 
+    # Se encontrou a linha na cache requisitante
     if linhaComTagCorrespondente != None:
 
+        # Se a linha encontrada na cache requisitante tem estado MESIF diferente de inválido
         if linhaComTagCorrespondente.tag != EstadoMesif.INVALID:
 
+            # Cache hit: retornar a palavra da linha da cache requisitante
+            # de acordo com o seu índice
             # TODO: Exibir Cache Hit
             encontrouLinhaValida = True
             return linhaComTagCorrespondente.palavras[indicePalavra]
     
+    # Se não saiu da função pelo return, então significa que não houve Cache Hit, logo deve-se
+    # procurar em outras caches
     # TODO: Exibir Cache Miss
     indiceProcCacheAtual = 0
     encontrouLinhaEmOutraCache = False
     while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
 
+        # Verificação para não realizar a busca da linha na própria cache requisitante mais uma vez
         if indiceProcCacheAtual != indiceProcCacheRequisitante:
 
-            linhaProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual])
-            estadoMesifAtual: EstadoMesif = linhaProcCacheAtual.estadoMesif
-            if (estadoMesifAtual == EstadoMesif.FORWARD) or (estadoMesifAtual == EstadoMesif.MODIFIED) or (estadoMesifAtual == EstadoMesif.EXCLUSIVE):
+            # Realiza a busca na cache do índice atual
+            linhaProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual], tag)
+            
+            # Se encontrou a linha na cache atual
+            if linhaProcCacheAtual != None:
+                estadoMesifAtual: EstadoMesif = linhaProcCacheAtual.estadoMesif
+                
+                # Se o estado mesif da linha encontrada em outra cache for diferente de invalid e
+                # diferente de shared, parar a busca e guardar a linha encontrada
+                if (estadoMesifAtual == EstadoMesif.FORWARD) or (estadoMesifAtual == EstadoMesif.MODIFIED) or (estadoMesifAtual == EstadoMesif.EXCLUSIVE):
 
-                encontrouLinhaEmOutraCache = True
-                linhaEncontradaEmOutraCache = linhaProcCacheAtual
+                    encontrouLinhaEmOutraCache = True
+                    linhaEncontradaEmOutraCache = linhaProcCacheAtual
     
+    # Se terminou a procura em outras caches tendo encontrado a linha com estado diferente de inválido
     if encontrouLinhaEmOutraCache:
 
         if linhaComTagCorrespondente == None:
@@ -71,6 +88,8 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
 
             linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
     else:
+        # Se não encontrou na cache requisitante nem em outras caches
+        # Leitura à memória
         #TODO: Ler da MP
         pass
     
@@ -91,13 +110,15 @@ def buscaLinhaCache(procCache: ProcessadorCache, tag) -> LinhaCache:
     if encontrou:
         
         return procCache.linhas[indiceLinhaCacheAtual]
+    else:
+        return None
 
 def copiaLinha(linhaFonte: LinhaCache, linhaDestino: LinhaCache, tamanhoLinha: int):
 
     linhaDestino.tag = linhaFonte.tag
     linhaDestino.sendoUsada = linhaFonte.sendoUsada
 
-    copiaVetorDePalavras(linhaFonte.palavras, linhaDestino.palavras)
+    copiaVetorDePalavras(linhaFonte.palavras, linhaDestino.palavras, tamanhoLinha)
 
 def atualizaIndiceDeSubstituicao(procCache: ProcessadorCache):
 
