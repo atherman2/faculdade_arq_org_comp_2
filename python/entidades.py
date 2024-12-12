@@ -36,7 +36,12 @@ class ProcessadorCache:
     
     def constroi(self):
 
-        self.linhas = [LinhaCache(self)] * self.quantidadeDeLinhas
+        self.linhas = []
+        indiceLinhaAtual = 0
+        while indiceLinhaAtual < self.quantidadeDeLinhas:
+
+            self.linhas.append(LinhaCache(self))
+            indiceLinhaAtual += 1
 
 class LinhaCache:
 
@@ -45,7 +50,13 @@ class LinhaCache:
         self.sendoUsada = False
         self.tag = -1
         self.estadoMesif = EstadoMesif.EMPTY
-        self.palavras = Palavra(processadorCache.intervaloAleatoriedadePalavras) * processadorCache.palavrasPorLinha
+        
+        self.palavras = []
+        indicePalavraAtual = 0
+        while indicePalavraAtual < processadorCache.palavrasPorLinha:
+
+            self.palavras.append(Palavra(processadorCache.intervaloAleatoriedadePalavras))
+            indicePalavraAtual += 1
 
 class ConjuntoProcessadoresCaches:
 
@@ -56,7 +67,12 @@ class ConjuntoProcessadoresCaches:
     
     def constroi(self):
 
-        self.procCaches = [ProcessadorCache()] * self.quantidadeProcCaches
+        self.procCaches = []
+        indiceProcCacheAtual = 0
+        while indiceProcCacheAtual < self.quantidadeProcCaches:
+
+            self.procCaches.append(ProcessadorCache())
+            indiceProcCacheAtual += 1
 
 class MemoriaPrincipal:
 
@@ -68,12 +84,22 @@ class MemoriaPrincipal:
         self.palavrasPorBloco = 0
 
     def constroi(self):
-            
-        self.blocos = [BlocoMp()] * self.quantidadeDeBlocos
+        
+        self.blocos = []
+        indiceBlocoAtual = 0
+        while indiceBlocoAtual < self.quantidadeDeBlocos:
+
+           self.blocos.append(BlocoMp(self))
+           indiceBlocoAtual += 1
 
 class BlocoMp:
 
     def __init__(self, memoriaPrincipal: MemoriaPrincipal):
 
         self.sendoUsada = False
-        self.palavras = [Palavra(memoriaPrincipal.intervaloAleatoriedadePalavras)] * memoriaPrincipal.palavrasPorBloco
+        self.palavras = []
+        indicePalavraAtual = 0
+        while indicePalavraAtual < memoriaPrincipal.palavrasPorBloco:
+
+            self.palavras.append(Palavra(memoriaPrincipal.intervaloAleatoriedadePalavras))
+            indicePalavraAtual += 1

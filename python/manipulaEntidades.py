@@ -10,6 +10,11 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     tag = endereco//palavrasPorLinha
     indicePalavra = endereco % palavrasPorLinha
 
+    print(f'''LEITURA: iniciando leitura
+    do endereco {endereco}
+    de tag {tag}
+    requisitada pela cache {indiceProcCacheRequisitante + 1}\n''')
+
     procCacheRequisitante = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
     linhaComTagCorrespondente = buscaLinhaCache(procCacheRequisitante, tag)
 
@@ -22,11 +27,15 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             # Cache hit: retornar a palavra da linha da cache requisitante
             # de acordo com o seu índice
             # TODO: Exibir Cache Hit
-            return linhaComTagCorrespondente.palavras[indicePalavra]
+            print(f'''    CACHE: Hit de Leitura''')
+            palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
+            print(f'''        palavra lida: {palavraLida.conteudo}\n''')
+            return palavraLida
     
     # Se não saiu da função pelo return, então significa que não houve Cache Hit, logo deve-se
     # procurar em outras caches
     # TODO: Exibir Cache Miss
+    print(f'''    CACHE: Miss de Leitura''')
     indiceProcCacheAtual = 0
     encontrouLinhaEmOutraCache = False
     while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
@@ -48,6 +57,8 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
 
                     encontrouLinhaEmOutraCache = True
                     linhaEncontradaEmOutraCache = linhaProcCacheAtual
+        
+        indiceProcCacheAtual += 1
     
     # Se terminou a procura em outras caches tendo encontrado a linha com estado diferente de inválido
     if encontrouLinhaEmOutraCache:
@@ -59,7 +70,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
 
             #TODO: tratar linha a ser substituída ter estado Forward ou Modificado
 
-            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
+            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco)
 
             palavraLida = linhaSubstituicao.palavras[indicePalavra]
 
@@ -68,7 +79,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
         # Se havia encontrado uma linha na cache requisitante, porém esta linha estava em estado inválido
         else:
 
-            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha)
+            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco)
 
             palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
         
@@ -96,6 +107,8 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             
             palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
     
+    print(f'''        palavra lida: {palavraLida.conteudo}\n''')
+
     return palavraLida
 
 def transefereBlocoParaLinha(memoriaPrincipal, endereco, linha: LinhaCache, tamanhoLinha):
@@ -103,10 +116,12 @@ def transefereBlocoParaLinha(memoriaPrincipal, endereco, linha: LinhaCache, tama
     bloco = lerBlocoMemoriaPrincipal(memoriaPrincipal, endereco)
     copiaVetorDePalavras(bloco.palavras, linha.palavras, tamanhoLinha)
     linha.estadoMesif = EstadoMesif.EXCLUSIVE
+    tag = endereco // memoriaPrincipal.palavrasPorBloco
+    linha.tag = tag
 
 # PROCESSOS CACHE //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-def buscaLinhaCache(procCache: ProcessadorCache, tag) -> LinhaCache:
+def buscaLinhaCache(procCache: ProcessadorCache, tag):
 
     indiceLinhaCacheAtual = 0
     encontrou = False
@@ -154,11 +169,22 @@ def transfereLinhaLeitura(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
     
     linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
 
+def trataSubstituicao(linhaSubstituicao: LinhaCache, conjuntoProcCache: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal):
+
+    #TODO: terminar
+
+    if linhaSubstituicao.estadoMesif == EstadoMesif.MODIFIED:
+
+        endereco = linhaSubstituicao.tag * memoriaPrincipal.palavrasPorBloco
+        escreverBlocoMemoriaPrincipal(memoriaPrincipal, endereco, linhaSubstituicao.palavras)
+
 # PROCESSOS MEMÓRIA PRINCIPAL //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 def lerBlocoMemoriaPrincipal(memoriaPrincipal: MemoriaPrincipal, endereco: int):
 
     #TODO: Exibir leitura na memória principal
+
+    print(f'''    MEMÓRIA PRINCIPAL: Leitura\n''')
 
     palavrasPorBloco = memoriaPrincipal.palavrasPorBloco
     indiceBloco = endereco//palavrasPorBloco
@@ -168,6 +194,8 @@ def lerBlocoMemoriaPrincipal(memoriaPrincipal: MemoriaPrincipal, endereco: int):
 def escreverBlocoMemoriaPrincipal(memoriaPrincipal: MemoriaPrincipal, endereco: int, palavras):
 
     #TODO: Exibir escrita na memória principal
+
+    print(f'''    MEMÓRIA PRINCIPAL: Escrita\n''')
 
     palavrasPorBloco = memoriaPrincipal.palavrasPorBloco
     indiceBloco = endereco//palavrasPorBloco

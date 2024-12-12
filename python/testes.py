@@ -3,19 +3,49 @@ from manipulaEntidades import *
 
 def test_leitura(conjuntoProcCache: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal):
 
-    memoriaPrincipal.blocos[0].palavras[0] = 0
-    memoriaPrincipal.blocos[0].palavras[1] = 1
-    memoriaPrincipal.blocos[1].palavras[0] = 2
-    memoriaPrincipal.blocos[1].palavras[1] = 3
-    memoriaPrincipal.blocos[2].palavras[0] = 4
-    memoriaPrincipal.blocos[2].palavras[1] = 5
-    memoriaPrincipal.blocos[3].palavras[0] = 6
-    memoriaPrincipal.blocos[3].palavras[1] = 7
+    memoriaPrincipal.blocos[0].palavras[0].conteudo = 0
+
+    # print(f"endereço 0 memória: {memoriaPrincipal.blocos[0].palavras[0].conteudo}")
+
+    memoriaPrincipal.blocos[0].palavras[1].conteudo = 1
+
+    # print(f"endereço 0 memória: {memoriaPrincipal.blocos[0].palavras[0].conteudo}")
+
+    memoriaPrincipal.blocos[1].palavras[0].conteudo = 2
+
+    # print(f"endereço 0 memória: {memoriaPrincipal.blocos[0].palavras[0].conteudo}")
+
+    memoriaPrincipal.blocos[1].palavras[1].conteudo = 3
+    memoriaPrincipal.blocos[2].palavras[0].conteudo = 4
+    memoriaPrincipal.blocos[2].palavras[1].conteudo = 5
+    memoriaPrincipal.blocos[3].palavras[0].conteudo = 6
+    memoriaPrincipal.blocos[3].palavras[1].conteudo = 7
+
+    # print(f"endereço 0 memória: {memoriaPrincipal.blocos[0].palavras[0].conteudo}")
+
+    enderecoAtual = 0
+    while enderecoAtual < 8:
+        # print(f"Endereço {enderecoAtual}")
+        valorAtual = lerPalavra(conjuntoProcCaches, memoriaPrincipal, enderecoAtual, 0)
+        
+        # print(f"endereço {enderecoAtual} valor {valorAtual.conteudo} cache {1}")
+        assert enderecoAtual == valorAtual.conteudo, f"endereco {enderecoAtual} valor {valorAtual.conteudo} memória {memoriaPrincipal.blocos[enderecoAtual//memoriaPrincipal.palavrasPorBloco].palavras[enderecoAtual % memoriaPrincipal.palavrasPorBloco].conteudo}"
+        valorAtual = lerPalavra(conjuntoProcCaches, memoriaPrincipal, enderecoAtual, 0)
+        # print(f"endereço {enderecoAtual} valor {valorAtual.conteudo} cache {1}")
+        assert enderecoAtual == valorAtual.conteudo
+        valorAtual = lerPalavra(conjuntoProcCaches, memoriaPrincipal, enderecoAtual, 1)
+        # print(f"endereço {enderecoAtual} valor {valorAtual.conteudo} cache {2}")
+        assert enderecoAtual == valorAtual.conteudo
+        valorAtual = lerPalavra(conjuntoProcCaches, memoriaPrincipal, enderecoAtual, 0)
+        # print(f"endereço {enderecoAtual} valor {valorAtual.conteudo} cache {1}")
+        assert enderecoAtual == valorAtual.conteudo
+
+        enderecoAtual += 1
 
 if __name__ == "__main__":
 
     memoriaPrincipal = MemoriaPrincipal()
-    conjuntoProcCache = ConjuntoProcessadoresCaches()
+    conjuntoProcCaches = ConjuntoProcessadoresCaches()
 
     QUANTIDADE_PALAVRAS = 2
 
@@ -24,9 +54,7 @@ if __name__ == "__main__":
 
     QUANTIDADE_BLOCOS = 4
     
-    INTERVALO_ALEATORIEDADE = Intervalo()
-    INTERVALO_ALEATORIEDADE.inicio = 0
-    INTERVALO_ALEATORIEDADE.fim = 999
+    INTERVALO_ALEATORIEDADE = Intervalo(0, 999)
 
     memoriaPrincipal.intervaloAleatoriedadePalavras = INTERVALO_ALEATORIEDADE
 
@@ -34,14 +62,18 @@ if __name__ == "__main__":
     memoriaPrincipal.quantidadeDeBlocos = QUANTIDADE_BLOCOS
     memoriaPrincipal.constroi()
 
-    conjuntoProcCache.quantidadeProcCaches = QUANTIDADE_CACHES
-    conjuntoProcCache.constroi()
+    conjuntoProcCaches.quantidadeProcCaches = QUANTIDADE_CACHES
+    conjuntoProcCaches.constroi()
 
     indiceProcCacheAtual = 0
     while indiceProcCacheAtual < QUANTIDADE_CACHES:
 
-        procCacheAtual = conjuntoProcCache.procCaches[indiceProcCacheAtual]
+        procCacheAtual = conjuntoProcCaches.procCaches[indiceProcCacheAtual]
         procCacheAtual.intervaloAleatoriedadePalavras = INTERVALO_ALEATORIEDADE
         procCacheAtual.palavrasPorLinha = QUANTIDADE_PALAVRAS
         procCacheAtual.quantidadeDeLinhas = QUANTIDADE_LINHAS
         procCacheAtual.constroi()
+
+        indiceProcCacheAtual += 1
+    
+    test_leitura(conjuntoProcCaches, memoriaPrincipal)
