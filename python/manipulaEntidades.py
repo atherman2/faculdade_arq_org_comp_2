@@ -15,8 +15,8 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     de tag {tag}
     requisitada pela cache {indiceProcCacheRequisitante + 1}\n''')
 
-    procCacheRequisitante = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
-    linhaComTagCorrespondente = buscaLinhaCache(procCacheRequisitante, tag)
+    procCacheRequisitante: ProcessadorCache = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
+    linhaComTagCorrespondente: LinhaCache = buscaLinhaCache(procCacheRequisitante, tag)
 
     # Se encontrou a linha na cache requisitante
     if linhaComTagCorrespondente != None:
@@ -36,37 +36,24 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     # procurar em outras caches
     # TODO: Exibir Cache Miss
     print(f'''    CACHE: Miss de Leitura''')
-    indiceProcCacheAtual = 0
+    encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCaches = buscaLinhaEmOutrasCaches(conjuntoProcCaches, tag, indiceProcCacheRequisitante)
+    
     encontrouLinhaEmOutraCache = False
-    while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
+    estadoNaOutraCache = EstadoMesif.NOTFOUND
+    for i, linha in enumerate(linhasEncontradasEmOutrasCaches):
+    
+        if linha.estadoMesif in (EstadoMesif.EXCLUSIVE, EstadoMesif.MODIFIED, EstadoMesif.FORWARD):
 
-        # Verificação para não realizar a busca da linha na própria cache requisitante mais uma vez
-        if indiceProcCacheAtual != indiceProcCacheRequisitante:
-
-            # Realiza a busca na cache do índice atual
-            linhaProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual], tag)
-            
-            # Se encontrou a linha na cache atual
-            if linhaProcCacheAtual != None:
-
-                estadoMesifAtual: EstadoMesif = linhaProcCacheAtual.estadoMesif
-                
-                # Se o estado mesif da linha encontrada em outra cache for diferente de invalid e
-                # diferente de shared, parar a busca e guardar a linha encontrada
-                if (estadoMesifAtual == EstadoMesif.FORWARD) or (estadoMesifAtual == EstadoMesif.MODIFIED) or (estadoMesifAtual == EstadoMesif.EXCLUSIVE):
-
-                    encontrouLinhaEmOutraCache = True
-                    linhaEncontradaEmOutraCache = linhaProcCacheAtual
-        
-        indiceProcCacheAtual += 1
+            estadoNaOutraCache = linha.estadoMesif
+            linhaEncontradaEmOutraCache = linha
     
     # Se terminou a procura em outras caches tendo encontrado a linha com estado diferente de inválido
-    if encontrouLinhaEmOutraCache:
+    if encontrouLinhaEmOutraCache and (estadoNaOutraCache in (EstadoMesif.EXCLUSIVE, EstadoMesif.MODIFIED, EstadoMesif.FORWARD)):
 
         # Se não havia encontrado linha na cache requisitante (substituir uma linha existente ou adicionar linha)
         if linhaComTagCorrespondente == None:
 
-            linhaSubstituicao = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
+            linhaSubstituicao: LinhaCache = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
 
             #TODO: tratar linha a ser substituída ter estado Forward ou Modificado
 
@@ -137,6 +124,31 @@ def buscaLinhaCache(procCache: ProcessadorCache, tag):
     else:
         return None
 
+def buscaLinhaEmOutrasCaches(conjuntoProcCaches: ConjuntoProcessadoresCaches, tag: int, indiceProcCacheRequisitante: int):
+
+    indiceProcCacheAtual = 0
+    encontrouLinhaEmOutraCache = False
+    indicesProcCaches = []
+    linhasEncontradasEmOutrasCaches = []
+    while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
+
+        # Verificação para não realizar a busca da linha na própria cache requisitante mais uma vez
+        if indiceProcCacheAtual != indiceProcCacheRequisitante:
+
+            # Realiza a busca na cache do índice atual
+            linhaProcCacheAtual: LinhaCache = buscaLinhaCache(conjuntoProcCaches.procCaches[indiceProcCacheAtual], tag)
+            
+            # Se encontrou a linha na cache atual
+            if linhaProcCacheAtual != None:
+
+                encontrouLinhaEmOutraCache = True
+                linhasEncontradasEmOutrasCaches.append(linhaProcCacheAtual)
+                indicesProcCaches.append(indiceProcCacheAtual)
+
+        indiceProcCacheAtual += 1
+    
+    return encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCaches
+
 def copiaLinha(linhaFonte: LinhaCache, linhaDestino: LinhaCache, tamanhoLinha: int):
 
     linhaDestino.tag = linhaFonte.tag
@@ -169,14 +181,27 @@ def transfereLinhaLeitura(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
     
     linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
 
-def trataSubstituicao(linhaSubstituicao: LinhaCache, conjuntoProcCache: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal):
-
-    #TODO: terminar
+def trataSubstituicao(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, indiceProcCacheRequisitante: int):
 
     if linhaSubstituicao.estadoMesif == EstadoMesif.MODIFIED:
 
         endereco = linhaSubstituicao.tag * memoriaPrincipal.palavrasPorBloco
         escreverBlocoMemoriaPrincipal(memoriaPrincipal, endereco, linhaSubstituicao.palavras)
+    
+    elif linhaSubstituicao.estadoMesif == EstadoMesif.FORWARD:
+
+        trataLinhaSubstituicaoForward(linhaSubstituicao, conjuntoProcCaches, indiceProcCacheRequisitante)
+
+def trataLinhaSubstituicaoForward(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, indiceProCacheRequisitante: int):
+
+    encontrouLinhaEmOutrasCaches, linhasEncontradasEmOutrasCaches, indicesProcCaches = buscaLinhaEmOutrasCaches(conjuntoProcCaches, linhaSubstituicao.tag, indiceProCacheRequisitante)
+    primeiraLinhaShared = None
+    for linha in linhasEncontradasEmOutrasCaches:
+
+        if (primeiraLinhaShared == None) and (linha.estadoMesif == EstadoMesif.SHARED):
+
+            linha.estadoMesif = EstadoMesif.FORWARD
+            primeiraLinhaShared = linha
 
 # PROCESSOS MEMÓRIA PRINCIPAL //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

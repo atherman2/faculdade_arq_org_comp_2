@@ -9,6 +9,7 @@ class EstadoMesif(Enum):
     INVALID = 3
     FORWARD = 4
     EMPTY = 5
+    NOTFOUND = 6
 
 class Intervalo:
 
