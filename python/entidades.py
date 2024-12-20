@@ -87,7 +87,12 @@ class ConjuntoProcessadoresCaches:
                     arrayStrings.append(f"        - Tag: {linha.tag}\n")
                     arrayStrings.append(f"        - Palavras:\n")
                     for palavra in linha.palavras:
-                        arrayStrings.append(f"            {palavra.conteudo}\n")
+                        if palavra.sendoUsada:
+                            arrayStrings.append(f"            {palavra.conteudo}\n")
+                        else:
+                            arrayStrings.append(f"            palavra não usada: {palavra.conteudo}")
+                else:
+                    arrayStrings.append(f"        Esta linha não está sendo usada")
             arrayStrings.append("\n")
         arrayStrings.append("\n")
 
