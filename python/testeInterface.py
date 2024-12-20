@@ -17,7 +17,7 @@ class Interface(CTk):
         self.grid_columnconfigure(2, weight=1)
 
         self.grid_rowconfigure(0, weight=1)
-        # self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(1, weight=1)
 
         self.frameTesteMenu = FrameComMenu(self)
         self.frameTesteMenu.grid(row=0, column=0, padx=10, pady=10, sticky="snew")
@@ -25,16 +25,34 @@ class Interface(CTk):
         self.frameTesteMenu.incluirTitulo("Menu do Mercado")
 
         self.frameLogOperacoes = FrameComTexto(self)
-        self.frameLogOperacoes.grid(row=0, column=1, padx=10, pady=10, sticky="snew")
+        self.frameLogOperacoes.grid(row=1, column=0, padx=10, pady=10, sticky="snew")
 
         self.frameLogOperacoes.incluirTitulo("Log de Operações")
         self.frameLogOperacoes.incluirTexto()
 
-        self.frameEstadoMemoria = FrameComTexto(self)
-        self.frameEstadoMemoria.grid(row=0, column=2, padx=10, pady=10, sticky="snew")
+        self.frameEstadoCache = FrameComTexto(self)
+        self.frameEstadoCache.grid(row=0, column=1, padx=10, pady=10, sticky="snew")
 
-        self.frameEstadoMemoria.incluirTitulo("Estado da Cache e MP")
-        self.frameEstadoMemoria.incluirTexto()
+        self.frameEstadoCache.incluirTitulo("Estado Atual da Cache")
+        self.frameEstadoCache.incluirTexto()
+
+        self.frameLogCaches = FrameComTexto(self)
+        self.frameLogCaches.grid(row=1, column=1, padx=10, pady=10, sticky="snew")
+
+        self.frameLogCaches.incluirTitulo("Histórico das Caches")
+        self.frameLogCaches.incluirTexto()
+
+        self.frameEstadoMP = FrameComTexto(self)
+        self.frameEstadoMP.grid(row=0, column=2, padx=10, pady=10, sticky="snew")
+
+        self.frameEstadoMP.incluirTitulo("Estado Atual da Memória Principal")
+        self.frameEstadoMP.incluirTexto()
+
+        self.frameLogMP = FrameComTexto(self)
+        self.frameLogMP.grid(row=1, column=2, padx=10, pady=10, sticky="snew")
+
+        self.frameLogMP.incluirTitulo("Histórico das Caches")
+        self.frameLogMP.incluirTexto()
 
 class FrameComTexto(CTkFrame):
     def __init__(self, master):
