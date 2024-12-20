@@ -9,8 +9,20 @@ class Interface(CTk):
         self.geometry("1280x540")
         self.title("Simulador de Coerência de Cache e Aplicação estilo Estoque de Mercado")
 
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         self.cjtoCaches = cjtoCaches
         self.memPrinc = memPrinc
+
+        self.framePrincipal = FrameComScroll(self)
+        self.framePrincipal.grid(row=0, column=0, sticky="snew")
+
+class FrameComScroll(CTkScrollableFrame):
+
+    def __init__(self, master):
+
+        super().__init__(master)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -41,6 +53,9 @@ class Interface(CTk):
 
         self.frameLogCaches.incluirTitulo("Histórico das Caches")
         self.frameLogCaches.incluirTexto()
+        
+        self.frameLogCaches.configure(height=460)
+        self.frameLogCaches.texto.configure(height=340)
 
         self.frameEstadoMP = FrameComTexto(self)
         self.frameEstadoMP.grid(row=0, column=2, padx=10, pady=10, sticky="snew")
@@ -53,8 +68,12 @@ class Interface(CTk):
 
         self.frameLogMP.incluirTitulo("Histórico das Caches")
         self.frameLogMP.incluirTexto()
+        
+        self.frameLogMP.configure(height=460)
+        self.frameLogMP.texto.configure(height=340)
 
 class FrameComTexto(CTkFrame):
+    
     def __init__(self, master):
 
         super().__init__(master)
