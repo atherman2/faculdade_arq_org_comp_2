@@ -3,13 +3,13 @@ from random import randint
 
 class EstadoMesif(Enum):
 
-    MODIFIED = 0
-    EXCLUSIVE = 1
-    SHARED = 2
-    INVALID = 3
-    FORWARD = 4
-    EMPTY = 5
-    NOTFOUND = 6
+    MODIFIED = "Modificada"
+    EXCLUSIVE = "Exclusiva"
+    SHARED = "Compartilhada"
+    INVALID = "Inválida"
+    FORWARD = "Forward"
+    EMPTY = "Vazia"
+    NOTFOUND = "Não encontrada"
 
 class Intervalo:
 
@@ -50,7 +50,7 @@ class LinhaCache:
 
         self.sendoUsada = False
         self.tag = -1
-        self.estadoMesif = EstadoMesif.EMPTY
+        self.estadoMesif: EstadoMesif = EstadoMesif.EMPTY
         
         self.palavras: list[Palavra] = []
         indicePalavraAtual = 0
@@ -83,16 +83,17 @@ class ConjuntoProcessadoresCaches:
             arrayStrings.append("\n")
             for indiceLinha, linha in enumerate(procCache.linhas):
                 arrayStrings.append(f"        Linha #{indiceLinha + 1}\n")
-                if linha.sendoUsada:
-                    arrayStrings.append(f"        - Tag: {linha.tag}\n")
-                    arrayStrings.append(f"        - Palavras:\n")
-                    for palavra in linha.palavras:
-                        if palavra.sendoUsada:
-                            arrayStrings.append(f"            {palavra.conteudo}\n")
-                        else:
-                            arrayStrings.append(f"            palavra não usada: {palavra.conteudo}")
-                else:
-                    arrayStrings.append(f"        Esta linha não está sendo usada")
+                #if linha.sendoUsada:
+                arrayStrings.append(f"        - Tag: {linha.tag}\n")
+                arrayStrings.append(f"        - Estado: {linha.estadoMesif.value}\n")
+                arrayStrings.append(f"        - Palavras:\n")
+                for palavra in linha.palavras:
+                    if palavra.sendoUsada:
+                        arrayStrings.append(f"            {palavra.conteudo}\n")
+                    else:
+                        arrayStrings.append(f"            palavra não usada: {palavra.conteudo}\n")
+                #else:
+                #    arrayStrings.append(f"        Esta linha não está sendo usada\n")
             arrayStrings.append("\n")
         arrayStrings.append("\n")
 
@@ -109,7 +110,7 @@ class MemoriaPrincipal:
 
     def constroi(self):
         
-        self.blocos = []
+        self.blocos: list[BlocoMp] = []
         indiceBlocoAtual = 0
         while indiceBlocoAtual < self.quantidadeDeBlocos:
 
@@ -121,7 +122,7 @@ class BlocoMp:
     def __init__(self, memoriaPrincipal: MemoriaPrincipal):
 
         self.sendoUsada = False
-        self.palavras = []
+        self.palavras: list[Palavra] = []
         indicePalavraAtual = 0
         while indicePalavraAtual < memoriaPrincipal.palavrasPorBloco:
 

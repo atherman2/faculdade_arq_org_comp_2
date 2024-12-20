@@ -35,5 +35,13 @@ if __name__ == "__main__":
         indiceProcCacheAtual += 1
     
     interface = Interface(conjuntoProcCaches, memoriaPrincipal)
+    
+    interface.memPrinc.blocos[3].palavras[1].conteudo = 7
+
+    interface.consultarProduto(7, 0)
+    interface.consultarProduto(7, 0)
+    interface.consultarProduto(7, 2)
+    interface.consultarProduto(7, 0)
+    
     interface.mainloop()
     

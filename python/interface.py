@@ -18,7 +18,23 @@ class Interface(CTk):
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
-    #def consultarProduto(self, endereco):
+    def consultarProduto(self, endereco, indiceProcCache):
+
+        #TODO: pesquisar todas as infos produto
+        #TODO: terminar
+
+        palavra = lerPalavra(self.cjtoCaches, self.memPrinc, endereco, indiceProcCache)
+
+        self.atualizarLogEstadoCaches()
+    
+    def atualizarLogEstadoCaches(self):
+
+        cjtoCachesArrayStrings = self.cjtoCaches.paraArrayStrings()
+
+        self.framePrincipal.frameEstadoCache.limparTexto()
+        self.framePrincipal.frameEstadoCache.adicionarLinhasTexto(cjtoCachesArrayStrings)
+
+        self.framePrincipal.frameLogCaches.adicionarLinhasTexto(cjtoCachesArrayStrings)
 
 class FrameComScroll(CTkScrollableFrame):
 

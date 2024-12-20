@@ -38,9 +38,8 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     print(f'''    CACHE: Miss de Leitura''')
     encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCaches = buscaLinhaEmOutrasCaches(conjuntoProcCaches, tag, indiceProcCacheRequisitante)
     
-    encontrouLinhaEmOutraCache = False
     estadoNaOutraCache = EstadoMesif.NOTFOUND
-    for i, linha in enumerate(linhasEncontradasEmOutrasCaches):
+    for linha in linhasEncontradasEmOutrasCaches:
     
         if linha.estadoMesif in (EstadoMesif.EXCLUSIVE, EstadoMesif.MODIFIED, EstadoMesif.FORWARD):
 
@@ -48,7 +47,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             linhaEncontradaEmOutraCache = linha
     
     # Se terminou a procura em outras caches tendo encontrado a linha com estado diferente de inválido
-    if encontrouLinhaEmOutraCache and (estadoNaOutraCache in (EstadoMesif.EXCLUSIVE, EstadoMesif.MODIFIED, EstadoMesif.FORWARD)):
+    if estadoNaOutraCache in (EstadoMesif.EXCLUSIVE, EstadoMesif.MODIFIED, EstadoMesif.FORWARD):
 
         # Se não havia encontrado linha na cache requisitante (substituir uma linha existente ou adicionar linha)
         if linhaComTagCorrespondente == None:
@@ -124,7 +123,7 @@ def buscaLinhaCache(procCache: ProcessadorCache, tag):
     else:
         return None
 
-def buscaLinhaEmOutrasCaches(conjuntoProcCaches: ConjuntoProcessadoresCaches, tag: int, indiceProcCacheRequisitante: int):
+def buscaLinhaEmOutrasCaches(conjuntoProcCaches: ConjuntoProcessadoresCaches, tag: int, indiceProcCacheRequisitante: int) -> tuple[bool, list[LinhaCache], int]:
 
     indiceProcCacheAtual = 0
     encontrouLinhaEmOutraCache = False
@@ -240,3 +239,7 @@ def copiaPalavra(palavraFonte: Palavra, palavraDestino: Palavra):
 
     palavraDestino.conteudo = palavraFonte.conteudo
     palavraDestino.sendoUsada =  palavraFonte.sendoUsada
+
+# OUTROS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+# def estadoMesifParaString(estadoMesif: EstadoMesif):
