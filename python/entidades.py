@@ -37,7 +37,7 @@ class ProcessadorCache:
     
     def constroi(self):
 
-        self.linhas = []
+        self.linhas: list[LinhaCache] = []
         indiceLinhaAtual = 0
         while indiceLinhaAtual < self.quantidadeDeLinhas:
 
@@ -52,7 +52,7 @@ class LinhaCache:
         self.tag = -1
         self.estadoMesif = EstadoMesif.EMPTY
         
-        self.palavras = []
+        self.palavras: list[Palavra] = []
         indicePalavraAtual = 0
         while indicePalavraAtual < processadorCache.palavrasPorLinha:
 
@@ -68,12 +68,30 @@ class ConjuntoProcessadoresCaches:
     
     def constroi(self):
 
-        self.procCaches = []
+        self.procCaches: list[ProcessadorCache] = []
         indiceProcCacheAtual = 0
         while indiceProcCacheAtual < self.quantidadeProcCaches:
 
             self.procCaches.append(ProcessadorCache())
             indiceProcCacheAtual += 1
+    
+    def paraArrayStrings(self):
+
+        arrayStrings = []
+        for indiceProcCache, procCache in enumerate(self.procCaches):
+            arrayStrings.append(f"CACHE #{indiceProcCache + 1}\n")
+            arrayStrings.append("\n")
+            for indiceLinha, linha in enumerate(procCache.linhas):
+                arrayStrings.append(f"        Linha #{indiceLinha + 1}\n")
+                if linha.sendoUsada:
+                    arrayStrings.append(f"        - Tag: {linha.tag}\n")
+                    arrayStrings.append(f"        - Palavras:\n")
+                    for palavra in linha.palavras:
+                        arrayStrings.append(f"            {palavra.conteudo}\n")
+            arrayStrings.append("\n")
+        arrayStrings.append("\n")
+
+        return arrayStrings
 
 class MemoriaPrincipal:
 
