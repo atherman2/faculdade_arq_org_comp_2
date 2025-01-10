@@ -174,9 +174,7 @@ def transfereLinhaLeitura(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
         if linhaEncontradaEmOutraCache.estadoMesif == EstadoMesif.MODIFIED:
 
             escreverBlocoMemoriaPrincipal(memoriaPrincipal, endereco, linhaEncontradaEmOutraCache.palavras)
-        else:
-
-            linhaCacheRequisitante.estadoMesif = EstadoMesif.FORWARD
+        linhaCacheRequisitante.estadoMesif = EstadoMesif.FORWARD
     
     linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
 
