@@ -1,4 +1,4 @@
-from manipulaEntidades import *
+from python.controlaSimulador import *
 from customtkinter import *
 
 class Interface(CTk):

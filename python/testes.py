@@ -1,5 +1,5 @@
-from entidades import *
-from manipulaEntidades import *
+from python.classesSimulador import *
+from python.controlaSimulador import *
 
 def test_leitura(conjuntoProcCache: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal):
 
