@@ -1,4 +1,4 @@
-from python.classesSimulador import *
+from classesSimulador import *
 
 # PROCESSOS GERAIS - CACHE E MEMORIA PRINCIPAL /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -174,6 +174,7 @@ def transfereLinhaLeitura(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
         if linhaEncontradaEmOutraCache.estadoMesif == EstadoMesif.MODIFIED:
 
             escreverBlocoMemoriaPrincipal(memoriaPrincipal, endereco, linhaEncontradaEmOutraCache.palavras)
+        
         linhaCacheRequisitante.estadoMesif = EstadoMesif.FORWARD
     
     linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED

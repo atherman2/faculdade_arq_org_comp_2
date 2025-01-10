@@ -1,4 +1,4 @@
-from python.controlaSimulador import *
+from controlaSimulador import *
 from customtkinter import *
 
 class Interface(CTk):
