@@ -132,18 +132,30 @@ class FrameComMenu(CTkFrame):
         self.grid_rowconfigure(2, weight=1)
 
         self.opcoes = ["Cadastrar Produto", "Consultar Produto", "Editar Produto", "Remover Produto"]
-        self.menu = CTkOptionMenu(self, values=self.opcoes)
+        self.menu = CTkOptionMenu(self, values=self.opcoes, command=self.alternarSubframeAtual)
         self.menu.set("Cadastrar Produto")
         self.menu.grid(row=1, column=0, padx=10, pady=10, sticky="new")
 
-        self.subFrameCadastro = criaSubFrameCadastro(self)
-        self.subFrameCadastro.grid(row=2, column=0, padx=20, pady=20, sticky="snew")
+        self.subframes: dict[(str, CTkFrame)] = {
+            "Cadastrar Produto": criaSubFrameCadastro(self),
+            "Consultar Produto": criaSubFrameConsulta(self),
+            "Editar Produto": None,
+            "Remover Produto": None
+        }
+
+        self.subframes["Cadastrar Produto"].grid(row=2, column=0, padx=20, pady=20, sticky="snew")
+        self.subframeAtual = "Cadastrar Produto"
 
     def incluirTitulo(self, titulo):
 
         self.titulo =  CTkLabel(self, text=titulo)
         self.titulo.grid(row=0, column=0, pady=(10,5), padx=10)
+    
+    def alternarSubframeAtual(self, opcao):
 
+        self.subframes[self.subframeAtual].grid_forget()
+        self.subframes[opcao].grid(row=2, column=0, padx=20, pady=20, sticky="snew")
+        self.subframeAtual = opcao
 
 class FrameComEntradas(CTkFrame):
     
@@ -220,25 +232,55 @@ class SubFrameParCadastro(CTkFrame):
         self.entrada = CTkEntry(master=self, textvariable=self.variavelEntrada)
         self.entrada.grid(row=0, column=1, padx=(5,10), pady=10, sticky="snew")
 
-def criaSubFrameCadastro(frame: FrameComMenu):
+def criaSubFrameCadastro(framePai: FrameComMenu):
 
-    subFrameCadastro = FrameComEntradas(frame)
+    subFrameCadastro = FrameComEntradas(framePai)
     subFrameCadastro.incluirTitulo("Cadastrar Produto")
 
+    indiceSubFrameParCadastro = 0
+
     subFrameCadastro.adicionarSubFrameParCadastro()
-    subFrameCadastro.subFramesParCadastro[0].incluirRotulo("Quantidade\nem estoque:")
-    subFrameCadastro.subFramesParCadastro[0].incluirEntrada(0)
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Nome do\nproduto:")
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
+
+    indiceSubFrameParCadastro += 1
+
     subFrameCadastro.adicionarSubFrameParCadastro()
-    subFrameCadastro.subFramesParCadastro[1].incluirRotulo("Preço:")
-    subFrameCadastro.subFramesParCadastro[1].incluirEntrada(1)
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Quantidade\nem estoque:")
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
+
+    indiceSubFrameParCadastro += 1
+
     subFrameCadastro.adicionarSubFrameParCadastro()
-    subFrameCadastro.subFramesParCadastro[2].incluirRotulo("Mercado:")
-    subFrameCadastro.subFramesParCadastro[2].incluirEntrada(2)
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Preço:")
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
+
+    indiceSubFrameParCadastro += 1
+
     subFrameCadastro.adicionarSubFrameParCadastro()
-    subFrameCadastro.subFramesParCadastro[3].incluirRotulo("Custo\nno fornecedor:")
-    subFrameCadastro.subFramesParCadastro[3].incluirEntrada(3)
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Mercado:")
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
+
+    indiceSubFrameParCadastro += 1
+
+    subFrameCadastro.adicionarSubFrameParCadastro()
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Custo\nno fornecedor:")
+    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
 
     return subFrameCadastro
+
+def criaSubFrameConsulta(framePai: FrameComMenu):
+
+    subFrameConsulta =  FrameComEntradas(framePai)
+    subFrameConsulta.incluirTitulo("Consultar Produto")
+
+    indiceEntradas = 0
+
+    subFrameConsulta.adicionarSubFrameParCadastro()
+    subFrameConsulta.subFramesParCadastro[0].incluirRotulo("Nome do\nProduto:")
+    subFrameConsulta.subFramesParCadastro[0].incluirEntrada(indiceEntradas)
+
+    return subFrameConsulta
 
 if __name__ == "__main__":
 
@@ -276,4 +318,3 @@ if __name__ == "__main__":
     
     interface = Interface(conjuntoProcCaches, memoriaPrincipal)
     interface.mainloop()
-    
