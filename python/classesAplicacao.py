@@ -1,4 +1,4 @@
-class Produto:
+class DadosProduto:
 
     def __init__(self):
         
@@ -48,6 +48,44 @@ class GerenciaProdutos:
     
     def removeProduto(self, nomeProduto):
 
-        if self.dicionarioProdutosIndices.get(nomeProduto):
+        if self.dicionarioProdutosIndices.get(nomeProduto) ==  None:
 
-            pass
+            return -1
+        
+        else:
+
+            indiceProduto = self.dicionarioProdutosIndices.pop(nomeProduto)
+            self.listaEspacosDisponiveis.append(indiceProduto)
+            return indiceProduto
+    
+    def consultaProduto(self, nomeProduto):
+
+        return self.dicionarioProdutosIndices.get(nomeProduto)
+
+if __name__ == "__main__":
+
+    gerenciaProdutos = GerenciaProdutos()
+    print(gerenciaProdutos.adicionaProduto("Banana"))
+    gerenciaProdutos.maximoProdutos = 16
+
+    indiceBanana = gerenciaProdutos.adicionaProduto("Banana")
+    print(indiceBanana)
+    indiceLimao = gerenciaProdutos.adicionaProduto("Limão")
+    print(indiceLimao)
+    
+    print(gerenciaProdutos.consultaProduto("Banana"))
+    print(gerenciaProdutos.consultaProduto("Limão"))
+
+    indiceBanana = gerenciaProdutos.adicionaProduto("Banana")
+    print(indiceBanana)
+    
+    indiceRoma = gerenciaProdutos.adicionaProduto("Romã")
+    print(indiceRoma)
+    
+    indiceLimao = gerenciaProdutos.removeProduto("Limão")
+    print(indiceLimao)
+    indiceMelancia = gerenciaProdutos.removeProduto("Melancia")
+    print(indiceMelancia)
+    
+    indiceLimao = gerenciaProdutos.adicionaProduto("Limão")
+    print(indiceLimao)
