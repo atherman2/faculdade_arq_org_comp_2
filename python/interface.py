@@ -20,14 +20,30 @@ class Interface(CTk):
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
-    def consultarProduto(self, endereco, indiceProcCache):
+    def consultaProdutoSilenciosa(self, stringProduto):
 
         #TODO: pesquisar todas as infos produto
         #TODO: terminar
 
-        palavra = lerPalavra(self.cjtoCaches, self.memPrinc, endereco, indiceProcCache)
+        enderecoProduto = self.gerProd.consultaProduto(stringProduto)
+
+        indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
+
+        palavra = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
 
         self.atualizarLogEstadoCaches()
+
+        linhasConsulta = ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
+        return linhasConsulta
+    
+    def consultarProduto(self, stringProduto):
+
+        self.exibirConsulta(self.consultaProdutoSilenciosa(stringProduto))
+
+    def exibirConsulta(self, linhasConsulta):
+
+        self.janelaConsulta = JanelaExibirConsulta(self)
+        self.janelaConsulta.frameTexto.adicionarLinhasTexto(linhasConsulta)
     
     def atualizarLogEstadoCaches(self):
 
@@ -344,7 +360,8 @@ class JanelaSecundaria(CTkToplevel):
     def incluirFrameTexto(self):
         
         self.frameTexto = FrameComTexto(self)
-        self.rotulo.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="snew")
+        self.frameTexto.incluirTexto()
+        self.frameTexto.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="snew")
         self.indiceComponentes += 1
 
     def adicionarLinhasTexto(self, linhasTexto):
