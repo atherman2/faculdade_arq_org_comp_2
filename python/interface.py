@@ -1,9 +1,10 @@
 from controlaSimulador import *
+from classesAplicacao import *
 from customtkinter import *
 
 class Interface(CTk):
 
-    def __init__(self, cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal):
+    def __init__(self, cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal, gerProd: GerenciaProdutos):
 
         super().__init__()
         self.geometry("1280x540")
@@ -14,6 +15,7 @@ class Interface(CTk):
 
         self.cjtoCaches = cjtoCaches
         self.memPrinc = memPrinc
+        self.gerProd = gerProd
 
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
@@ -131,19 +133,26 @@ class FrameComMenu(CTkFrame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
 
-        self.opcoes = ["Cadastrar Produto", "Consultar Produto", "Editar Produto", "Remover Produto"]
-        self.menu = CTkOptionMenu(self, values=self.opcoes, command=self.alternarSubframeAtual)
-        self.menu.set("Cadastrar Produto")
-        self.menu.grid(row=1, column=0, padx=10, pady=10, sticky="new")
+        self.mercadoAtual = 0
+
+        self.opcoesQualMercado = ["Mercado 1", "Mercado 2", "Mercado 3", "Mercado 4"]
+        self.menuQualMercado = CTkOptionMenu(self, values=self.opcoesQualMercado, command=self.alternarMercado)
+        self.menuQualMercado.set("Mercado 1")
+        self.menuQualMercado.grid(row=1, column=0, padx=10, pady=10, sticky="new")
+
+        self.opcoesSubFrame = ["Cadastrar Produto", "Consultar Produto", "Editar Produto", "Remover Produto"]
+        self.menuSubFrame = CTkOptionMenu(self, values=self.opcoesSubFrame, command=self.alternarSubframeAtual)
+        self.menuSubFrame.set("Cadastrar Produto")
+        self.menuSubFrame.grid(row=2, column=0, padx=10, pady=10, sticky="new")
 
         self.subframes: dict[(str, FrameComEntradas)] = {
             "Cadastrar Produto": criaSubFrameCadastro(self),
             "Consultar Produto": criaSubFrameConsulta(self),
-            "Editar Produto": None,
-            "Remover Produto": None
+            "Editar Produto": criaSubFrameEditar(self),
+            "Remover Produto": criaSubFrameRemover(self)
         }
 
-        self.subframes["Cadastrar Produto"].grid(row=2, column=0, padx=20, pady=20, sticky="snew")
+        self.subframes["Cadastrar Produto"].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
         self.subframeAtual = "Cadastrar Produto"
 
     def incluirTitulo(self, titulo):
@@ -154,12 +163,16 @@ class FrameComMenu(CTkFrame):
     def alternarSubframeAtual(self, opcao):
 
         self.subframes[self.subframeAtual].grid_forget()
-        self.subframes[opcao].grid(row=2, column=0, padx=20, pady=20, sticky="snew")
+        self.subframes[opcao].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
         self.subframeAtual = opcao
     
     def incluirBotaoSubframe(self, stringSubframe, acaoBotao):
 
         self.subframes[stringSubframe].incluirBotao(acaoBotao)
+    
+    def alternarMercado(self, stringNovoMercado: str):
+
+        self.mercadoAtual = int(stringNovoMercado.split(" ")[1]) - 1
 
 class FrameComEntradas(CTkFrame):
     
@@ -275,8 +288,8 @@ def criaSubFrameConsulta(framePai: FrameComMenu):
     indiceEntradas = 0
 
     subFrameConsulta.adicionarSubFrameParCadastro()
-    subFrameConsulta.subFramesParCadastro[0].incluirRotulo("Nome do\nProduto:")
-    subFrameConsulta.subFramesParCadastro[0].incluirEntrada(indiceEntradas)
+    subFrameConsulta.subFramesParCadastro[indiceEntradas].incluirRotulo("Nome do\nProduto:")
+    subFrameConsulta.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
 
     return subFrameConsulta
 
@@ -289,10 +302,62 @@ def criaSubFrameEditar(framePai: FrameComMenu):
 
     
     subFrameEditar.adicionarSubFrameParCadastro()
-    subFrameEditar.subFramesParCadastro[0].incluirRotulo("Nome do\nProduto:")
-    subFrameEditar.subFramesParCadastro[0].incluirEntrada(indiceEntradas)
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Nome do\nProduto:")
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
 
     return subFrameEditar
+
+def criaSubFrameRemover(framePai: FrameComMenu):
+
+    subFrameRemover = FrameComEntradas(framePai)
+    subFrameRemover.incluirTitulo("Remover Produto")
+
+    indiceEntradas = 0
+
+    subFrameRemover.adicionarSubFrameParCadastro()
+    subFrameRemover.subFramesParCadastro[indiceEntradas].incluirRotulo("Nome do\nProduto:")
+    subFrameRemover.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
+
+    return subFrameRemover
+
+class JanelaSecundaria(CTkToplevel):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.geometry("300x200")
+        self.grab_set()
+        self.grid_columnconfigure(0, weight=1)
+        self.indiceComponentes = 0
+    
+    def setTitulo(self, titulo):
+
+        self.title(titulo)
+    
+    def adicionarRotulo(self, rotulo):
+
+        self.rotulo = CTkLabel(self, text=rotulo)
+        self.rotulo.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="ew")
+        self.grid_columnconfigure(self.indiceComponentes, weight=1)
+        self.indiceComponentes += 1
+
+    def incluirFrameTexto(self):
+        
+        self.frameTexto = FrameComTexto(self)
+        self.rotulo.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="snew")
+        self.indiceComponentes += 1
+
+    def adicionarLinhasTexto(self, linhasTexto):
+
+        self.frameTexto.adicionarLinhasTexto(linhasTexto)
+
+class JanelaExibirConsulta(JanelaSecundaria):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.adicionarRotulo("Exibição do Produto Consultado")
+        self.incluirFrameTexto()
 
 if __name__ == "__main__":
 
@@ -328,5 +393,7 @@ if __name__ == "__main__":
 
         indiceProcCacheAtual += 1
     
-    interface = Interface(conjuntoProcCaches, memoriaPrincipal)
+    gerenciaProdutos = GerenciaProdutos()
+
+    interface = Interface(conjuntoProcCaches, memoriaPrincipal, gerenciaProdutos)
     interface.mainloop()

@@ -34,7 +34,9 @@ if __name__ == "__main__":
 
         indiceProcCacheAtual += 1
     
-    interface = Interface(conjuntoProcCaches, memoriaPrincipal)
+    gerenciaProdutos = GerenciaProdutos()
+
+    interface = Interface(conjuntoProcCaches, memoriaPrincipal, gerenciaProdutos)
     
     interface.memPrinc.blocos[3].palavras[1].conteudo = 7
 
