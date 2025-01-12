@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     interface.framePrincipal.frameTesteMenu.mercadoAtual = 0
 
-    interface.consultarProduto("Lixia")
+    interface.consultaProdutoSilenciosa("Lixia")
     
     interface.mainloop()
     

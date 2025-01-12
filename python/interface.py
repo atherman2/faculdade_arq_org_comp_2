@@ -20,6 +20,9 @@ class Interface(CTk):
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
+        frameMenu = self.framePrincipal.frameTesteMenu
+        frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
+
     def consultaProdutoSilenciosa(self, stringProduto):
 
         #TODO: pesquisar todas as infos produto
@@ -27,18 +30,30 @@ class Interface(CTk):
 
         enderecoProduto = self.gerProd.consultaProduto(stringProduto)
 
-        indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
+        if enderecoProduto != None:
 
-        palavra = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
+            indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
 
-        self.atualizarLogEstadoCaches()
+            palavra = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
 
-        linhasConsulta = ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
+            self.atualizarLogEstadoCaches()
+
+            linhasConsulta = ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
+        
+        else:
+
+            linhasConsulta = ["Produto não encontrado!\n"]
+
         return linhasConsulta
     
     def consultarProduto(self, stringProduto):
 
         self.exibirConsulta(self.consultaProdutoSilenciosa(stringProduto))
+
+    def comunicaConsulta(self):
+
+        stringProduto = self.framePrincipal.frameTesteMenu.subFrames["Consultar Produto"].getParesCadastros()[0]
+        self.consultarProduto(stringProduto)
 
     def exibirConsulta(self, linhasConsulta):
 
@@ -161,15 +176,15 @@ class FrameComMenu(CTkFrame):
         self.menuSubFrame.set("Cadastrar Produto")
         self.menuSubFrame.grid(row=2, column=0, padx=10, pady=10, sticky="new")
 
-        self.subframes: dict[(str, FrameComEntradas)] = {
+        self.subFrames: dict[(str, FrameComEntradas)] = {
             "Cadastrar Produto": criaSubFrameCadastro(self),
             "Consultar Produto": criaSubFrameConsulta(self),
             "Editar Produto": criaSubFrameEditar(self),
             "Remover Produto": criaSubFrameRemover(self)
         }
 
-        self.subframes["Cadastrar Produto"].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
-        self.subframeAtual = "Cadastrar Produto"
+        self.subFrames["Cadastrar Produto"].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
+        self.subFrameAtual = "Cadastrar Produto"
 
     def incluirTitulo(self, titulo):
 
@@ -178,13 +193,13 @@ class FrameComMenu(CTkFrame):
     
     def alternarSubframeAtual(self, opcao):
 
-        self.subframes[self.subframeAtual].grid_forget()
-        self.subframes[opcao].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
-        self.subframeAtual = opcao
+        self.subFrames[self.subFrameAtual].grid_forget()
+        self.subFrames[opcao].grid(row=3, column=0, padx=20, pady=20, sticky="snew")
+        self.subFrameAtual = opcao
     
-    def incluirBotaoSubframe(self, stringSubframe, acaoBotao):
+    def incluirBotaoSubframe(self, stringSubframe, textoBotao, acaoBotao):
 
-        self.subframes[stringSubframe].incluirBotao(acaoBotao)
+        self.subFrames[stringSubframe].incluirBotao(textoBotao, acaoBotao)
     
     def alternarMercado(self, stringNovoMercado: str):
 
@@ -234,9 +249,9 @@ class FrameComEntradas(CTkFrame):
             retorno.append(variavelEntrada.get())
         return retorno
 
-    def incluirBotao(self, acaoBotao):
+    def incluirBotao(self, textoBotao, acaoBotao):
 
-        self.botaoCadastrar = CTkButton(self, text="Cadastrar", command=acaoBotao)
+        self.botaoCadastrar = CTkButton(self, text=textoBotao, command=acaoBotao)
         self.botaoCadastrar.grid(row=self.indiceComponent, column=0, sticky="ew")
         self.indiceComponent += 1
 
