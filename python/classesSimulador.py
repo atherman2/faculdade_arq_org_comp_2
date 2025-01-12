@@ -117,6 +117,21 @@ class MemoriaPrincipal:
            self.blocos.append(BlocoMp(self))
            indiceBlocoAtual += 1
 
+    def paraArrayStrings(self):
+
+        arrayStrings = []
+        for indiceBloco, bloco in enumerate(self.blocos):
+            arrayStrings.append(f"BLOCO DE TAG #{indiceBloco}\n")
+            for palavra in bloco.palavras:
+                if palavra.sendoUsada:
+                    arrayStrings.append(f"            {palavra.conteudo}\n")
+                else:
+                    arrayStrings.append(f"            palavra não usada: {palavra.conteudo}\n")
+            arrayStrings.append("\n")
+        arrayStrings.append("\n")
+
+        return arrayStrings
+
 class BlocoMp:
 
     def __init__(self, memoriaPrincipal: MemoriaPrincipal):

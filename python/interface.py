@@ -38,6 +38,7 @@ class Interface(CTk):
             palavra = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
 
             self.atualizarLogEstadoCaches()
+            self.atualizarLogEstadoMp()
 
             linhasConsulta = ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
         
@@ -111,6 +112,15 @@ class Interface(CTk):
         self.framePrincipal.frameEstadoCache.adicionarLinhasTexto(cjtoCachesArrayStrings)
 
         self.framePrincipal.frameLogCaches.adicionarLinhasTexto(cjtoCachesArrayStrings)
+    
+    def atualizarLogEstadoMp(self):
+
+        memPrincArrayStrings = self.memPrinc.paraArrayStrings()
+
+        self.framePrincipal.frameEstadoMp.limparTexto()
+        self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(memPrincArrayStrings)
+
+        self.framePrincipal.frameLogMp.adicionarLinhasTexto(memPrincArrayStrings)
 
 class FrameComScroll(CTkScrollableFrame):
 
@@ -151,20 +161,20 @@ class FrameComScroll(CTkScrollableFrame):
         self.frameLogCaches.configure(height=460)
         self.frameLogCaches.texto.configure(height=340)
 
-        self.frameEstadoMP = FrameComTexto(self)
-        self.frameEstadoMP.grid(row=0, column=2, padx=10, pady=10, sticky="snew")
+        self.frameEstadoMp = FrameComTexto(self)
+        self.frameEstadoMp.grid(row=0, column=2, padx=10, pady=10, sticky="snew")
 
-        self.frameEstadoMP.incluirTitulo("Estado Atual da Memória Principal")
-        self.frameEstadoMP.incluirTexto()
+        self.frameEstadoMp.incluirTitulo("Estado Atual da Memória Principal")
+        self.frameEstadoMp.incluirTexto()
 
-        self.frameLogMP = FrameComTexto(self)
-        self.frameLogMP.grid(row=1, column=2, padx=10, pady=10, sticky="snew")
+        self.frameLogMp = FrameComTexto(self)
+        self.frameLogMp.grid(row=1, column=2, padx=10, pady=10, sticky="snew")
 
-        self.frameLogMP.incluirTitulo("Histórico das Caches")
-        self.frameLogMP.incluirTexto()
+        self.frameLogMp.incluirTitulo("Histórico das Caches")
+        self.frameLogMp.incluirTexto()
         
-        self.frameLogMP.configure(height=460)
-        self.frameLogMP.texto.configure(height=340)
+        self.frameLogMp.configure(height=460)
+        self.frameLogMp.texto.configure(height=340)
 
 class FrameComTexto(CTkFrame):
     
