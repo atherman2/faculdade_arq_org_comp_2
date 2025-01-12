@@ -22,6 +22,7 @@ class Interface(CTk):
 
         frameMenu = self.framePrincipal.frameTesteMenu
         frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
+        frameMenu.incluirBotaoSubframe("Remover Produto", "Remover", self.comunicaConfirmacaoRemocao)
 
     def consultaProdutoSilenciosa(self, stringProduto):
 
@@ -46,6 +47,21 @@ class Interface(CTk):
 
         return linhasConsulta
     
+    def exibirConsulta(self, linhasConsulta):
+        
+        if linhasConsulta == ["Produto não encontrado!\n"]:
+
+            self.janelaProdutoNaoEncontrado = JanelaProdutoNaoEncontrado(self)
+            self.janelaProdutoNaoEncontrado.adicionarFrameBotoes()
+            self.janelaProdutoNaoEncontrado.frameBotoes.adicionarBotao("Ok", self.janelaProdutoNaoEncontrado.destroy)
+
+        else:
+            
+            self.janelaConsulta = JanelaExibirConsulta(self)
+            self.janelaConsulta.adicionarLinhasTexto(linhasConsulta)
+            self.janelaConsulta.adicionarFrameBotoes()
+            self.janelaConsulta.frameBotoes.adicionarBotao("Ok", self.janelaConsulta.destroy)
+    
     def consultarProduto(self, stringProduto):
 
         self.exibirConsulta(self.consultaProdutoSilenciosa(stringProduto))
@@ -55,11 +71,38 @@ class Interface(CTk):
         stringProduto = self.framePrincipal.frameTesteMenu.subFrames["Consultar Produto"].getParesCadastros()[0]
         self.consultarProduto(stringProduto)
 
-    def exibirConsulta(self, linhasConsulta):
+    def exibirConfirmacaoRemocao(self, stringProduto, linhasInfoProduto):
 
-        self.janelaConsulta = JanelaExibirConsulta(self)
-        self.janelaConsulta.frameTexto.adicionarLinhasTexto(linhasConsulta)
-    
+        if linhasInfoProduto == ["Produto não encontrado!\n"]:
+
+            self.janelaProdutoNaoEncontrado = JanelaProdutoNaoEncontrado(self)
+            self.janelaProdutoNaoEncontrado.adicionarFrameBotoes()
+            self.janelaProdutoNaoEncontrado.frameBotoes.adicionarBotao("Ok", self.janelaProdutoNaoEncontrado.destroy)
+
+        else:
+
+            self.stringProdutoRemocao = stringProduto
+            self.janelaRemocao = JanelaExibirRemocao(self)
+            self.janelaRemocao.adicionarLinhasTexto(linhasInfoProduto)
+            self.janelaRemocao.adicionarFrameBotoes()
+            self.janelaRemocao.frameBotoes.adicionarBotao("Cancelar", self.janelaRemocao.destroy)
+            self.janelaRemocao.frameBotoes.adicionarBotao("Remover", self.removeProduto)
+
+    def confirmacaoRemocaoProduto(self, stringProduto):
+
+        self.exibirConfirmacaoRemocao(stringProduto, self.consultaProdutoSilenciosa(stringProduto))
+
+    def comunicaConfirmacaoRemocao(self):
+
+        stringProduto =  self.framePrincipal.frameTesteMenu.subFrames["Remover Produto"].getParesCadastros()[0]
+        self.confirmacaoRemocaoProduto(stringProduto)
+
+    def removeProduto(self):
+
+        self.gerProd.removeProduto(self.stringProdutoRemocao)
+        self.janelaRemocao.destroy()
+        self.janelaSucessoRemocao = JanelaOperacaoBemSucedida(self, "Remoção")
+
     def atualizarLogEstadoCaches(self):
 
         cjtoCachesArrayStrings = self.cjtoCaches.paraArrayStrings()
@@ -356,7 +399,7 @@ class JanelaSecundaria(CTkToplevel):
     def __init__(self, pai):
 
         super().__init__(pai)
-        self.geometry("300x200")
+        self.geometry("300x380")
         self.grab_set()
         self.grid_columnconfigure(0, weight=1)
         self.indiceComponentes = 0
@@ -377,19 +420,72 @@ class JanelaSecundaria(CTkToplevel):
         self.frameTexto = FrameComTexto(self)
         self.frameTexto.incluirTexto()
         self.frameTexto.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="snew")
+        
         self.indiceComponentes += 1
 
     def adicionarLinhasTexto(self, linhasTexto):
 
         self.frameTexto.adicionarLinhasTexto(linhasTexto)
+    
+    def adicionarFrameBotoes(self):
+
+        self.frameBotoes = FrameBotoesAddHorizontal(self)
+        self.frameBotoes.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="ew")
+        
+        self.indiceComponentes += 1
 
 class JanelaExibirConsulta(JanelaSecundaria):
 
     def __init__(self, pai):
 
         super().__init__(pai)
+        self.setTitulo("Consulta de Produto")
         self.adicionarRotulo("Exibição do Produto Consultado")
         self.incluirFrameTexto()
+
+class JanelaExibirRemocao(JanelaSecundaria):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.setTitulo("Remoção de Produto")
+        self.adicionarRotulo("Deseja remover este produto?")
+        self.incluirFrameTexto()
+
+class JanelaProdutoNaoEncontrado(JanelaSecundaria):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.setTitulo("Erro")
+        self.adicionarRotulo("Produto não encontrado!")
+
+class JanelaOperacaoBemSucedida(JanelaSecundaria):
+
+    def __init__(self, pai, nomeOperacao):
+
+        super().__init__(pai)
+        self.setTitulo("Sucesso")
+        self.adicionarRotulo(f"{nomeOperacao} concluiu-se com sucesso!")
+        self.adicionarFrameBotoes()
+        self.frameBotoes.adicionarBotao("Ok", self.destroy)
+
+class FrameBotoesAddHorizontal(CTkFrame):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.indiceBotao = 0
+        self.botoes: list[CTkButton] = []
+        self.grid_rowconfigure(0, weight=1)
+    
+    def adicionarBotao(self, textoBotao, acaoBotao):
+
+        self.grid_columnconfigure(self.indiceBotao, weight=1)
+        self.botoes.append(CTkButton(self, text=textoBotao, command=acaoBotao))
+        self.botoes[self.indiceBotao].grid(row=0, column=self.indiceBotao, padx=15, pady=15)
+        
+        self.indiceBotao += 1
 
 if __name__ == "__main__":
 
