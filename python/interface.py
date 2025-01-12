@@ -136,7 +136,7 @@ class FrameComMenu(CTkFrame):
         self.menu.set("Cadastrar Produto")
         self.menu.grid(row=1, column=0, padx=10, pady=10, sticky="new")
 
-        self.subframes: dict[(str, CTkFrame)] = {
+        self.subframes: dict[(str, FrameComEntradas)] = {
             "Cadastrar Produto": criaSubFrameCadastro(self),
             "Consultar Produto": criaSubFrameConsulta(self),
             "Editar Produto": None,
@@ -156,6 +156,10 @@ class FrameComMenu(CTkFrame):
         self.subframes[self.subframeAtual].grid_forget()
         self.subframes[opcao].grid(row=2, column=0, padx=20, pady=20, sticky="snew")
         self.subframeAtual = opcao
+    
+    def incluirBotaoSubframe(self, stringSubframe, acaoBotao):
+
+        self.subframes[stringSubframe].incluirBotao(acaoBotao)
 
 class FrameComEntradas(CTkFrame):
     
@@ -166,8 +170,6 @@ class FrameComEntradas(CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         
         self.subFramesParCadastro: list[SubFrameParCadastro] = []
-
-        self.itensCadastrados = []
 
         self.indiceComponent = 1
     
@@ -202,14 +204,10 @@ class FrameComEntradas(CTkFrame):
             variavelEntrada: StringVar = subFrameParCadastro.variavelEntrada
             retorno.append(variavelEntrada.get())
         return retorno
-    
-    def cadastrar(self):
 
-        self.itensCadastrados.append(self.getParesCadastros())
+    def incluirBotao(self, acaoBotao):
 
-    def incluirBotaoCadastrar(self):
-
-        self.botaoCadastrar = CTkButton(self, text="Cadastrar", command=self.cadastrar)
+        self.botaoCadastrar = CTkButton(self, text="Cadastrar", command=acaoBotao)
         self.botaoCadastrar.grid(row=self.indiceComponent, column=0, sticky="ew")
         self.indiceComponent += 1
 
@@ -281,6 +279,20 @@ def criaSubFrameConsulta(framePai: FrameComMenu):
     subFrameConsulta.subFramesParCadastro[0].incluirEntrada(indiceEntradas)
 
     return subFrameConsulta
+
+def criaSubFrameEditar(framePai: FrameComMenu):
+
+    subFrameEditar = FrameComEntradas(framePai)
+    subFrameEditar.incluirTitulo("Editar Produto")
+
+    indiceEntradas = 0
+
+    
+    subFrameEditar.adicionarSubFrameParCadastro()
+    subFrameEditar.subFramesParCadastro[0].incluirRotulo("Nome do\nProduto:")
+    subFrameEditar.subFramesParCadastro[0].incluirEntrada(indiceEntradas)
+
+    return subFrameEditar
 
 if __name__ == "__main__":
 
