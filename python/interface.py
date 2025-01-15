@@ -20,6 +20,9 @@ class Interface(CTk):
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
+        self.informarEstadoInicial()
+        self.indiceOperacao = 1
+
         frameMenu = self.framePrincipal.frameTesteMenu
         frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
         frameMenu.incluirBotaoSubframe("Remover Produto", "Remover", self.comunicaConfirmacaoRemocao)
@@ -33,14 +36,18 @@ class Interface(CTk):
 
         if enderecoProduto != None:
 
+            self.informarOperacao()
+
             indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
 
-            palavra = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
+            palavra, arrayStringsOperacao = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
 
             self.atualizarLogEstadoCaches()
             self.atualizarLogEstadoMp()
+            self.atualizarLogOperacoes(arrayStringsOperacao)
 
-            linhasConsulta = ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
+            linhasConsulta = ["Nome do Produto: " + stringProduto + "\n"]
+            linhasConsulta += ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
         
         else:
 
@@ -108,8 +115,8 @@ class Interface(CTk):
 
         cjtoCachesArrayStrings = self.cjtoCaches.paraArrayStrings()
 
-        self.framePrincipal.frameEstadoCache.limparTexto()
-        self.framePrincipal.frameEstadoCache.adicionarLinhasTexto(cjtoCachesArrayStrings)
+        self.framePrincipal.frameEstadoCaches.limparTexto()
+        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(cjtoCachesArrayStrings)
 
         self.framePrincipal.frameLogCaches.adicionarLinhasTexto(cjtoCachesArrayStrings)
     
@@ -121,6 +128,34 @@ class Interface(CTk):
         self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(memPrincArrayStrings)
 
         self.framePrincipal.frameLogMp.adicionarLinhasTexto(memPrincArrayStrings)
+    
+    def atualizarLogOperacoes(self, arrayStringsOperacao):
+
+        self.framePrincipal.frameLogOperacoes.adicionarLinhasTexto(arrayStringsOperacao)
+    
+    def broadCastLinhasTexto(self, linhasTexto):
+
+        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(linhasTexto)
+        self.framePrincipal.frameLogCaches.adicionarLinhasTexto(linhasTexto)
+        self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(linhasTexto)
+        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(linhasTexto)
+        self.framePrincipal.frameLogOperacoes.adicionarLinhasTexto(linhasTexto)
+    
+    def informarEstadoInicial(self):
+
+        estadoInicial = [f"ESTADO INICIAL:\n\n"]
+        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(estadoInicial)
+        self.framePrincipal.frameLogCaches.adicionarLinhasTexto(estadoInicial)
+        self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(estadoInicial)
+        self.framePrincipal.frameLogMp.adicionarLinhasTexto(estadoInicial)
+
+        self.atualizarLogEstadoCaches()
+        self.atualizarLogEstadoMp()
+
+    def informarOperacao(self):
+
+        self.broadCastLinhasTexto([f"\n\n\nOPERAÇÃO #{self.indiceOperacao}\n\n"])
+        self.indiceOperacao += 1
 
 class FrameComScroll(CTkScrollableFrame):
 
@@ -146,11 +181,11 @@ class FrameComScroll(CTkScrollableFrame):
         self.frameLogOperacoes.incluirTitulo("Log de Operações")
         self.frameLogOperacoes.incluirTexto()
 
-        self.frameEstadoCache = FrameComTexto(self)
-        self.frameEstadoCache.grid(row=0, column=1, padx=10, pady=10, sticky="snew")
+        self.frameEstadoCaches = FrameComTexto(self)
+        self.frameEstadoCaches.grid(row=0, column=1, padx=10, pady=10, sticky="snew")
 
-        self.frameEstadoCache.incluirTitulo("Estado Atual da Cache")
-        self.frameEstadoCache.incluirTexto()
+        self.frameEstadoCaches.incluirTitulo("Estado Atual da Cache")
+        self.frameEstadoCaches.incluirTexto()
 
         self.frameLogCaches = FrameComTexto(self)
         self.frameLogCaches.grid(row=1, column=1, padx=10, pady=10, sticky="snew")
