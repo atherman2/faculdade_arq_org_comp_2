@@ -14,27 +14,28 @@ class OpTeste(Enum):
 
 class TestaMemoria():
 
-    def __init__(self, conjCaches, memPrinc):
+    def __init__(self, cjtoCaches, memPrinc):
         
-        self.conjCaches: ConjuntoProcessadoresCaches = conjCaches
+        self.cjtoCaches: ConjuntoProcessadoresCaches = cjtoCaches
         self.memPrinc: MemoriaPrincipal = memPrinc
         self.listaEscrita = []
+        self.tamanhoListaEscrita = 0
         self.operacoes = {
-            OpTeste.ESCRITA: self.escrita,
-            OpTeste.LEITURA: self.leitura
+            OpTeste.ESCRITA: self.opEscrita,
+            OpTeste.LEITURA: self.opLeitura
         }
 
     def leitura(self, endereco, indiceCache):
 
-        return lerPalavra(self.conjCaches, self.memPrinc, endereco, indiceCache)
+        return lerPalavra(self.cjtoCaches, self.memPrinc, endereco, indiceCache)
     
     def escrita(self, endereco, indiceCache, conteudoNovaPalavra):
 
-        return escreverPalavra(self.conjCaches, self.memPrinc, endereco, indiceCache, conteudoNovaPalavra)
+        return escreverPalavra(self.cjtoCaches, self.memPrinc, endereco, indiceCache, conteudoNovaPalavra)
     
     def exibeCaches(self):
 
-        exibirTodos(self.conjCaches.paraArrayStrings())
+        exibirTodos(self.cjtoCaches.paraArrayStrings())
 
     def exibeInfoLeitura(self, endereco, indiceCache):
 
@@ -50,25 +51,14 @@ class TestaMemoria():
         log = self.escrita(endereco, indiceCache, conteudoNovaPalavra)
         exibirTodos(log)
         self.exibeCaches()
-
-    def opEscrita(self, endereco, indiceCache, conteudoNovaPalavra):
-
-        self.exibeInfoEscrita(endereco, indiceCache, conteudoNovaPalavra)
-        self.inserirListaEscrita([endereco, conteudoNovaPalavra])
-    
-    def opLeitura(self, endereco, indiceCache):
-
-        valorLido = self.exibeInfoLeitura(endereco, indiceCache)
-        ultimoValorEscrito = self.removerListaEscrita([endereco])
-        print(f"ultimoValorEscrito = {ultimoValorEscrito}, valorLido = {valorLido}")
     
     def inserirListaEscrita(self, vetorInfo):
 
         encontrou = False
         
-        for escrita, indiceEscrita in enumerate(self.listaEscrita):
+        for indiceEscrita in range(self.tamanhoListaEscrita):
 
-            if escrita[0] == vetorInfo[0]:
+            if indiceEscrita[indiceEscrita][0] == vetorInfo[0]:
 
                 self.listaEscrita[indiceEscrita][1] = vetorInfo[1]
                 encontrou = True
@@ -76,20 +66,42 @@ class TestaMemoria():
         if not encontrou:
 
             self.listaEscrita.append(vetorInfo)
+            self.tamanhoListaEscrita += 1
     
     def removerListaEscrita(self, vetorInfo):
 
         valorEncontrado = None
 
-        for escrita, indiceEscrita in enumerate(self.listaEscrita):
+        for indiceEscrita in range(self.tamanhoListaEscrita):
 
-            if escrita[0] == vetorInfo[0]:
+            if self.listaEscrita[indiceEscrita][0] == vetorInfo[0]:
 
-                valorEncontrado = escrita[1]
+                valorEncontrado = self.listaEscrita[indiceEscrita][1]
                 indiceValorEncontrado = indiceEscrita
         
-        self.listaEscrita.pop(indiceValorEncontrado)
+        if valorEncontrado != None:
+        
+            self.listaEscrita.pop(indiceValorEncontrado)
+            self.tamanhoListaEscrita -= 1
+        
         return valorEncontrado
+
+    def opEscrita(self, vetorInfo):
+
+        self.exibeInfoEscrita(vetorInfo[0], vetorInfo[1], vetorInfo[2])
+        self.inserirListaEscrita([vetorInfo[0], vetorInfo[2]])
+    
+    def opLeitura(self, vetorInfo):
+
+        valorLido = self.exibeInfoLeitura(vetorInfo[0], vetorInfo[1])
+        ultimoValorEscrito = self.removerListaEscrita([vetorInfo[0]])
+        print(f"ultimoValorEscrito = {ultimoValorEscrito}, valorLido = {valorLido}")
+
+    def execOps(self, vetorOperacoes):
+
+        for operacao in vetorOperacoes:
+
+            self.operacoes[operacao[0]](operacao[1])
 
 def test_leitura(conjuntoProcCache: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal):
 
@@ -309,19 +321,44 @@ def test_escrita_leitura_5(conjuntoProcCaches: ConjuntoProcessadoresCaches, memo
     ultimoValorEscritoEnd3 = 120
     escreverPalavra(conjuntoProcCaches, memoriaPrincipal, 3, 0, 115)
     lerPalavra(conjuntoProcCaches, memoriaPrincipal, 3, 1)
+    
     for i in range(2):
         escreverPalavra(conjuntoProcCaches, memoriaPrincipal, 4+i, 2, 116+i)
         lerPalavra(conjuntoProcCaches, memoriaPrincipal, 5-i, 3)
+    
     escreverPalavra(conjuntoProcCaches, memoriaPrincipal, 3, 1, ultimoValorEscritoEnd3)
     lerPalavra(conjuntoProcCaches, memoriaPrincipal, 6, 2)
     valorLidoEnd3 = lerPalavra(conjuntoProcCaches, memoriaPrincipal, 3, 0)[0].conteudo
     assert valorLidoEnd3 == ultimoValorEscritoEnd3, f"ultimoValorEscritoEnd3 = {ultimoValorEscritoEnd3}, valorLidoEnd3 = {valorLidoEnd3}"
 
-    ultimoValorEscritoEnd3 = 120
-    log = escreverPalavra(conjuntoProcCaches, memoriaPrincipal, 3, 0, 115)
-    exibirTodos(log)
-    log = conjuntoProcCaches.paraArrayStrings()
-    exibirTodos(log)
+def test_escrita_leitura_6(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal):
+
+    testaMemoria = TestaMemoria(cjtoCaches, memPrinc)
+    testaMemoria.execOps([[OpTeste.ESCRITA, [3, 0, 115]]])
+    testaMemoria.execOps([[OpTeste.LEITURA, [3, 1]]])
+    
+    for i in range(2):
+        testaMemoria.execOps([[OpTeste.ESCRITA, [4+i, 2, 116+i]]])
+        testaMemoria.execOps([[OpTeste.LEITURA, [4+i, 3]]])
+    
+    testaMemoria.execOps([[OpTeste.ESCRITA, [3, 1, 120]]])
+    testaMemoria.execOps([[OpTeste.LEITURA, [4, 2]]])
+    testaMemoria.execOps([[OpTeste.LEITURA, [3, 0]]])
+
+def test_escrita_leitura_7(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal):
+
+    testaMemoria = TestaMemoria(cjtoCaches, memPrinc)
+    testaMemoria.execOps([[OpTeste.ESCRITA,[3, 0, 115]],
+                          [OpTeste.LEITURA,[3, 1]],
+
+                          [OpTeste.ESCRITA,[4, 2, 116]],
+                          [OpTeste.LEITURA,[4, 3]],
+                          [OpTeste.ESCRITA,[5, 2, 117]],
+                          [OpTeste.LEITURA,[5, 3]],
+                          
+                          [OpTeste.ESCRITA,[3, 1, 120]],
+                          [OpTeste.LEITURA,[4, 2]],
+                          [OpTeste.LEITURA,[3, 0]]])
 
 if __name__ == "__main__":
 
@@ -357,4 +394,4 @@ if __name__ == "__main__":
 
         indiceProcCacheAtual += 1
     
-    test_escrita_leitura_5(conjuntoProcCaches, memoriaPrincipal)
+    test_escrita_leitura_7(conjuntoProcCaches, memoriaPrincipal)
