@@ -2,7 +2,7 @@ from classesSimulador import *
 
 # PROCESSOS GERAIS - CACHE E MEMORIA PRINCIPAL /////////////////////////////////////////////////////////////////////////////////////////////
 
-def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, endereco: int, indiceProcCacheRequisitante: int):
+def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, endereco: int, indiceProcCacheRequisitante: int) -> tuple[Palavra, list[str]]:
 
     arrayStrings = []
 
@@ -59,7 +59,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
             trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
-            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco)
+            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
             palavraLida = linhaSubstituicao.palavras[indicePalavra]
 
@@ -68,7 +68,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
         # Se havia encontrado uma linha na cache requisitante, porém esta linha estava em estado inválido
         else:
 
-            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco)
+            transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
             palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
         
@@ -84,7 +84,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
             trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
-            arrayStrings.append(f'''             MEMÓRIA PRINCIPAL: Leitura\n\n''')
+            arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
             transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
             
             palavraLida = linhaSubstituicao.palavras[indicePalavra]
@@ -94,7 +94,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
         # Se havia encontrado uma linha na cache requisitante, porém esta linha estava em estado inválido
         else:
 
-            arrayStrings.append(f'''             MEMÓRIA PRINCIPAL: Leitura\n\n''')
+            arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
             transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha)
             
             palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
@@ -107,7 +107,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
     arrayStrings = []
 
-    novaPalavra = Palavra((0,1))
+    novaPalavra = Palavra(Intervalo(0,1))
     novaPalavra.conteudo = conteudoNovaPalavra
     novaPalavra.sendoUsada = True
         
@@ -118,7 +118,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
     tag = endereco//palavrasPorLinha
     indicePalavra = endereco % palavrasPorLinha
 
-    arrayStrings.append(f"ESCRITA: iniciando escria\n")
+    arrayStrings.append(f"ESCRITA: iniciando escrita\n")
     arrayStrings.append(f"do endereço {endereco}\n")
     arrayStrings.append(f"de tag {tag}\n")
     arrayStrings.append(f"requisitada pela cache {indiceProcCacheRequisitante + 1}\n\n")
@@ -142,7 +142,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
             ocorreuWriteMiss = False
 
-        linhaComTagCorrespondente.tag = EstadoMesif.MODIFIED
+        linhaComTagCorrespondente.estadoMesif = EstadoMesif.MODIFIED
         linhaComTagCorrespondente.sendoUsada = True
 
     if ocorreuWriteMiss:
@@ -172,12 +172,20 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
                 linhaSubstituicao.palavras[indicePalavra] = novaPalavra
 
                 atualizaIndiceDeSubstituicao(procCacheRequisitante)
+
+                for linha in linhasEncontradasEmOutrasCaches:
+
+                    linha.estadoMesif = EstadoMesif.INVALID
             
             else:
 
                 transfereLinhaEscrita(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
                 linhaComTagCorrespondente.palavras[indicePalavra] = novaPalavra
+            
+            for linha in linhasEncontradasEmOutrasCaches:
+
+                linha.estadoMesif = EstadoMesif.INVALID
         
         else:
 
@@ -187,16 +195,20 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
                 trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
-                arrayStrings.append(f'''             MEMÓRIA PRINCIPAL: Leitura\n\n''')
+                arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
                 transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
 
                 linhaSubstituicao.palavras[indicePalavra] = novaPalavra
+
+                linhaSubstituicao.estadoMesif = EstadoMesif.MODIFIED
+                linhaSubstituicao.tag = tag
+                linhaSubstituicao.sendoUsada = True
 
                 atualizaIndiceDeSubstituicao(procCacheRequisitante)
             
             else:
 
-                arrayStrings.append(f'''             MEMÓRIA PRINCIPAL: Leitura\n\n''')
+                arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
                 transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha)
 
                 linhaComTagCorrespondente.palavras[indicePalavra] = novaPalavra
@@ -235,7 +247,7 @@ def buscaLinhaEmOutrasCaches(conjuntoProcCaches: ConjuntoProcessadoresCaches, ta
     encontrouLinhaEmOutraCache = False
     indicesProcCaches = []
     linhasEncontradasEmOutrasCaches = []
-    while (not encontrouLinhaEmOutraCache) and (indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches):
+    while indiceProcCacheAtual < conjuntoProcCaches.quantidadeProcCaches:
 
         # Verificação para não realizar a busca da linha na própria cache requisitante mais uma vez
         if indiceProcCacheAtual != indiceProcCacheRequisitante:
