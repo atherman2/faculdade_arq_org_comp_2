@@ -68,7 +68,7 @@ class TestaMemoria():
             self.listaEscrita.append(vetorInfo)
             self.tamanhoListaEscrita += 1
     
-    def removerListaEscrita(self, vetorInfo):
+    def consultarListaEscrita(self, vetorInfo):
 
         valorEncontrado = None
 
@@ -88,8 +88,9 @@ class TestaMemoria():
     def opLeitura(self, vetorInfo):
 
         valorLido = self.exibeInfoLeitura(vetorInfo[0], vetorInfo[1])
-        ultimoValorEscrito = self.removerListaEscrita([vetorInfo[0]])
-        print(f"ultimoValorEscrito = {ultimoValorEscrito}, valorLido = {valorLido}")
+        ultimoValorEscrito = self.consultarListaEscrita([vetorInfo[0]])
+        # print(f"ultimoValorEscrito = {ultimoValorEscrito}, valorLido = {valorLido}")
+        assert ultimoValorEscrito == valorLido, f"ultimoValorEscrito = {ultimoValorEscrito}, valorLido = {valorLido}"
 
     def execOps(self, vetorOperacoes):
 
@@ -354,6 +355,108 @@ def test_escrita_leitura_7(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: Me
                           [OpTeste.LEITURA,[4, 2]],
                           [OpTeste.LEITURA,[3, 0]]])
 
+def test_escrita_leitura_8_errado(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal):
+
+    testaMemoria = TestaMemoria(cjtoCaches, memPrinc)
+    testaMemoria.execOps([
+        # Teste 1: Operações simples alternadas
+        [OpTeste.ESCRITA, [0, 0, 100]],
+        [OpTeste.LEITURA, [0, 1]],
+        [OpTeste.ESCRITA, [1, 2, 101]],
+        [OpTeste.LEITURA, [0, 3]],
+
+        # Teste 2: Múltiplas leituras após escrita
+        [OpTeste.ESCRITA, [2, 0, 150]],
+        [OpTeste.LEITURA, [2, 1]],
+        [OpTeste.LEITURA, [2, 2]],
+        [OpTeste.LEITURA, [2, 3]],
+        [OpTeste.LEITURA, [2, 0]],
+
+        # Teste 3: Padrão ping-pong entre endereços
+        [OpTeste.ESCRITA, [3, 0, 200]],
+        [OpTeste.LEITURA, [4, 0]],
+        [OpTeste.ESCRITA, [4, 1, 201]],
+        [OpTeste.LEITURA, [3, 1]],
+        [OpTeste.ESCRITA, [3, 2, 202]],
+        [OpTeste.LEITURA, [4, 2]],
+
+        # Teste 4: Acesso sequencial em endereços
+        [OpTeste.ESCRITA, [5, 0, 250]],
+        [OpTeste.ESCRITA, [6, 0, 251]],
+        [OpTeste.ESCRITA, [7, 0, 252]],
+        [OpTeste.LEITURA, [5, 1]],
+        [OpTeste.LEITURA, [6, 1]],
+        [OpTeste.LEITURA, [7, 1]],
+
+        # Teste 5: Intensivo em um único endereço
+        [OpTeste.ESCRITA, [8, 0, 300]],
+        [OpTeste.LEITURA, [8, 1]],
+        [OpTeste.ESCRITA, [8, 2, 301]],
+        [OpTeste.LEITURA, [8, 3]],
+        [OpTeste.ESCRITA, [8, 0, 302]],
+        [OpTeste.LEITURA, [8, 1]],
+        [OpTeste.ESCRITA, [8, 2, 303]],
+
+        # Teste 6: Padrão circular nos índices
+        [OpTeste.ESCRITA, [9, 0, 350]],
+        [OpTeste.ESCRITA, [9, 1, 351]],
+        [OpTeste.ESCRITA, [9, 2, 352]],
+        [OpTeste.ESCRITA, [9, 3, 353]],
+        [OpTeste.LEITURA, [9, 0]],
+        [OpTeste.LEITURA, [9, 1]],
+
+        # Teste 7: Mistura de endereços distantes
+        [OpTeste.ESCRITA, [0, 0, 400]],
+        [OpTeste.ESCRITA, [15, 1, 401]],
+        [OpTeste.LEITURA, [0, 2]],
+        [OpTeste.LEITURA, [15, 3]],
+        [OpTeste.ESCRITA, [7, 0, 402]],
+        [OpTeste.LEITURA, [8, 1]],
+
+        # Teste 8: Padrão de sobrescrita
+        [OpTeste.ESCRITA, [10, 0, 450]],
+        [OpTeste.ESCRITA, [10, 1, 451]],
+        [OpTeste.ESCRITA, [10, 0, 452]],
+        [OpTeste.LEITURA, [10, 2]],
+        [OpTeste.ESCRITA, [10, 1, 453]],
+        [OpTeste.LEITURA, [10, 3]]
+    ])
+
+def test_escrita_leitura_9(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal):
+
+    testaMemoria = TestaMemoria(cjtoCaches, memPrinc)
+    testaMemoria.execOps([
+        # Teste 1: Escrita seguida de múltiplas leituras
+        [OpTeste.ESCRITA, [0, 0, 100]],
+        [OpTeste.LEITURA, [0, 1]],
+        [OpTeste.LEITURA, [0, 2]],
+        [OpTeste.LEITURA, [0, 3]],
+
+        # Teste 2: Múltiplas escritas e leituras no mesmo endereço
+        [OpTeste.ESCRITA, [1, 0, 150]],
+        [OpTeste.LEITURA, [1, 1]],
+        [OpTeste.ESCRITA, [1, 2, 151]],
+        [OpTeste.LEITURA, [1, 3]],
+        [OpTeste.ESCRITA, [1, 0, 152]],
+        [OpTeste.LEITURA, [1, 1]],
+
+        # Teste 3: Padrão ping-pong com escritas antes das leituras
+        [OpTeste.ESCRITA, [2, 0, 200]],
+        [OpTeste.ESCRITA, [3, 1, 201]],
+        [OpTeste.LEITURA, [2, 2]],
+        [OpTeste.LEITURA, [3, 3]],
+        [OpTeste.ESCRITA, [2, 0, 202]],
+        [OpTeste.LEITURA, [2, 1]],
+
+        # Teste 4: Sequencial com garantia de escrita prévia
+        [OpTeste.ESCRITA, [4, 0, 250]],
+        [OpTeste.ESCRITA, [5, 0, 251]],
+        [OpTeste.ESCRITA, [6, 0, 252]],
+        [OpTeste.LEITURA, [4, 1]],
+        [OpTeste.LEITURA, [5, 1]],
+        [OpTeste.LEITURA, [6, 1]]
+    ])
+
 if __name__ == "__main__":
 
     memoriaPrincipal = MemoriaPrincipal()
@@ -388,4 +491,4 @@ if __name__ == "__main__":
 
         indiceProcCacheAtual += 1
     
-    test_escrita_leitura_7(conjuntoProcCaches, memoriaPrincipal)
+    test_escrita_leitura_9(conjuntoProcCaches, memoriaPrincipal)

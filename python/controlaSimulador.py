@@ -24,7 +24,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     if linhaComTagCorrespondente != None:
 
         # Se a linha encontrada na cache requisitante tem estado MESIF diferente de inválido
-        if linhaComTagCorrespondente.tag != EstadoMesif.INVALID:
+        if linhaComTagCorrespondente.tag in (EstadoMesif.MODIFIED, EstadoMesif.EXCLUSIVE, EstadoMesif.FORWARD, EstadoMesif.SHARED):
 
             # Cache hit: retornar a palavra da linha da cache requisitante
             # de acordo com o seu índice
@@ -126,6 +126,8 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
     procCacheRequisitante = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
     linhaComTagCorrespondente = buscaLinhaCache(procCacheRequisitante, tag)
 
+    encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCachesOutrasLinhas = buscaLinhaEmOutrasCaches(conjuntoProcCaches, tag, indiceProcCacheRequisitante)
+
     # Seta ocorreuWriteMiss para True. Porém, caso não tenha ocorrido,
     # será setado para False
     ocorreuWriteMiss = True
@@ -140,14 +142,16 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
             # Escrevendo a palavra de fato na cache
             linhaComTagCorrespondente.palavras[indicePalavra] = novaPalavra
 
+            for linha in linhasEncontradasEmOutrasCaches:
+
+                linha.estadoMesif = EstadoMesif.INVALID
+
             ocorreuWriteMiss = False
 
         linhaComTagCorrespondente.estadoMesif = EstadoMesif.MODIFIED
         linhaComTagCorrespondente.sendoUsada = True
 
     if ocorreuWriteMiss:
-
-        encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCachesOutrasLinhas = buscaLinhaEmOutrasCaches(conjuntoProcCaches, tag, indiceProcCacheRequisitante)
 
         estadoNaOutraCache = EstadoMesif.NOTFOUND
         for linha in linhasEncontradasEmOutrasCaches:
