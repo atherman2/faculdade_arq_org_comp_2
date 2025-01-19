@@ -34,6 +34,7 @@ class Interface(CTk):
         self.indiceOperacao = 1
 
         frameMenu = self.framePrincipal.frameTesteMenu
+        frameMenu.incluirBotaoSubframe("Cadastrar Produto", "Cadastrar", self.comunicaCadastro)
         frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
         frameMenu.incluirBotaoSubframe("Remover Produto", "Remover", self.comunicaConfirmacaoRemocao)
 
@@ -45,17 +46,15 @@ class Interface(CTk):
         self.atualizarInfoEstadoMp()
         self.atualizarLogOperacoes(arrayStringsOperacao)
 
-    def escreverVetor(self, vetorInfo):
+    def escreverVetor(self, enderecoBase, vetorInfo):
 
         for indiceInfo, info in enumerate(vetorInfo):
 
-            self.escrever(indiceInfo * self.intervaloEnderecoInfo, info)
+            self.escrever(enderecoBase + indiceInfo * self.intervaloEnderecoInfo, info)
 
     def cadastroProdutoSilenciosa(self, vetorProduto: list):
 
-        indiceVetorProduto = 0
-
-        enderecoBaseProduto = self.gerProd.adicionaProduto(vetorProduto[indiceVetorProduto])
+        enderecoBaseProduto = self.gerProd.adicionaProduto(vetorProduto[0])
 
         if enderecoBaseProduto in (-1, -2):
 
@@ -64,16 +63,37 @@ class Interface(CTk):
         self.informarOperacao()
 
         self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
-        vetorInfo = vetorProduto[1:].insert(1, self.indiceProcCache)
-        self.escreverVetor(vetorInfo)
+        vetorInfo = vetorProduto[1:]
+        vetorInfo.insert(1, self.indiceProcCache)
+        self.escreverVetor(enderecoBaseProduto, vetorInfo)
 
         return vetorProduto
     
-    def exibirCadastro(self, retornoAdiciona):
+    def exibirCadastro(self, retornoAdiciona, nomeProduto):
 
         if retornoAdiciona == -1:
 
-            pass
+            JanelaProdutoJaExistente(self, nomeProduto)
+        
+        elif retornoAdiciona == -2:
+
+            JanelaLimiteProdutos(self)
+
+        else:
+
+            janelaSucesso = JanelaOperacaoBemSucedida(self, "Cadastro")
+            # janelaSucesso.incluirFrameTexto()
+
+            # for string in retornoAdiciona:
+            
+            #     string += "\n"
+            
+            # janelaSucesso.frameTexto.adicionarLinhasTexto(retornoAdiciona)
+    
+    def comunicaCadastro(self):
+
+        vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Cadastrar Produto"].getParesCadastros()
+        self.exibirCadastro(self.cadastroProdutoSilenciosa(vetorProduto), vetorProduto[0])
 
     def consultaProdutoSilenciosa(self, stringProduto):
 
@@ -517,6 +537,26 @@ class JanelaSecundaria(CTkToplevel):
         self.frameBotoes.grid(row=self.indiceComponentes, column=0, padx=15, pady=15, sticky="ew")
         
         self.indiceComponentes += 1
+
+class JanelaProdutoJaExistente(JanelaSecundaria):
+
+    def __init__(self, pai, nomeProduto):
+
+        super().__init__(pai)
+        self.setTitulo("Erro")
+        self.adicionarRotulo(f"Produto {nomeProduto} que tenta-se cadastrar\njá está cadastrado!")
+        self.adicionarFrameBotoes()
+        self.frameBotoes.adicionarBotao("Ok", self.destroy)
+
+class JanelaLimiteProdutos(JanelaSecundaria):
+
+    def __init__(self, pai):
+
+        super().__init__(pai)
+        self.setTitulo("Erro")
+        self.adicionarRotulo("Máximo de produtos atingido!")
+        self.adicionarFrameBotoes()
+        self.frameBotoes.adicionarBotao("Ok", self.destroy)
 
 class JanelaExibirConsulta(JanelaSecundaria):
 

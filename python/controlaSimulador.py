@@ -217,6 +217,8 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
                 linhaComTagCorrespondente.palavras[indicePalavra] = novaPalavra
     
+    arrayStrings.append(f"                     palavra escrita: {novaPalavra.conteudo}\n\n\n")
+
     return arrayStrings
 
 def transfereBlocoParaLinha(memoriaPrincipal, endereco, linha: LinhaCache, tamanhoLinha):
