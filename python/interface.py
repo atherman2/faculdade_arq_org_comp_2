@@ -20,6 +20,10 @@ class Interface(CTk):
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
+        self.framesCaches = [self.framePrincipal.frameEstadoCaches, self.framePrincipal.frameLogCaches]
+        self.framesMp = [self.framePrincipal.frameEstadoMp, self.framePrincipal.frameLogMp]
+        self.frameLogOp = [self.framePrincipal.frameLogOperacoes]
+
         self.informarEstadoInicial()
         self.indiceOperacao = 1
 
@@ -135,19 +139,17 @@ class Interface(CTk):
     
     def broadCastLinhasTexto(self, linhasTexto):
 
-        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(linhasTexto)
-        self.framePrincipal.frameLogCaches.adicionarLinhasTexto(linhasTexto)
-        self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(linhasTexto)
-        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(linhasTexto)
-        self.framePrincipal.frameLogOperacoes.adicionarLinhasTexto(linhasTexto)
+        for frame in (self.framesCaches + self.framesMp + self.frameLogOp):
+
+            frame.adicionarLinhasTexto(linhasTexto)
     
     def informarEstadoInicial(self):
 
         estadoInicial = [f"ESTADO INICIAL:\n\n"]
-        self.framePrincipal.frameEstadoCaches.adicionarLinhasTexto(estadoInicial)
-        self.framePrincipal.frameLogCaches.adicionarLinhasTexto(estadoInicial)
-        self.framePrincipal.frameEstadoMp.adicionarLinhasTexto(estadoInicial)
-        self.framePrincipal.frameLogMp.adicionarLinhasTexto(estadoInicial)
+        
+        for frame in (self.framesCaches + self.framesMp):
+
+            frame.adicionarLinhasTexto(estadoInicial)
 
         self.atualizarLogEstadoCaches()
         self.atualizarLogEstadoMp()
@@ -388,12 +390,6 @@ def criaSubFrameCadastro(framePai: FrameComMenu):
     indiceSubFrameParCadastro += 1
 
     subFrameCadastro.adicionarSubFrameParCadastro()
-    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Mercado:")
-    subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
-
-    indiceSubFrameParCadastro += 1
-
-    subFrameCadastro.adicionarSubFrameParCadastro()
     subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirRotulo("Custo\nno fornecedor:")
     subFrameCadastro.subFramesParCadastro[indiceSubFrameParCadastro].incluirEntrada(indiceSubFrameParCadastro)
 
@@ -419,7 +415,6 @@ def criaSubFrameEditar(framePai: FrameComMenu):
 
     indiceEntradas = 0
 
-    
     subFrameEditar.adicionarSubFrameParCadastro()
     subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Nome do\nProduto:")
     subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
