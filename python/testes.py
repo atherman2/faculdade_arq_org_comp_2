@@ -58,7 +58,7 @@ class TestaMemoria():
         
         for indiceEscrita in range(self.tamanhoListaEscrita):
 
-            if indiceEscrita[indiceEscrita][0] == vetorInfo[0]:
+            if self.listaEscrita[indiceEscrita][0] == vetorInfo[0]:
 
                 self.listaEscrita[indiceEscrita][1] = vetorInfo[1]
                 encontrou = True
@@ -77,13 +77,7 @@ class TestaMemoria():
             if self.listaEscrita[indiceEscrita][0] == vetorInfo[0]:
 
                 valorEncontrado = self.listaEscrita[indiceEscrita][1]
-                indiceValorEncontrado = indiceEscrita
-        
-        if valorEncontrado != None:
-        
-            self.listaEscrita.pop(indiceValorEncontrado)
-            self.tamanhoListaEscrita -= 1
-        
+                
         return valorEncontrado
 
     def opEscrita(self, vetorInfo):
