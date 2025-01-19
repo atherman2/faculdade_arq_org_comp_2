@@ -10,7 +10,7 @@ if __name__ == "__main__":
     QUANTIDADE_CACHES = 4
     QUANTIDADE_LINHAS = 2
 
-    QUANTIDADE_BLOCOS = 4
+    QUANTIDADE_BLOCOS = 32
     
     INTERVALO_ALEATORIEDADE = Intervalo(0, 999)
 

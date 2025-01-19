@@ -235,14 +235,18 @@ def buscaLinhaCache(procCache: ProcessadorCache, tag):
     encontrou = False
     while (not encontrou) and (indiceLinhaCacheAtual < procCache.quantidadeDeLinhas):
 
-        encontrou = (procCache.linhas[indiceLinhaCacheAtual].tag == tag)
+        encontrou = procCache.linhas[indiceLinhaCacheAtual].tag == tag
+        
         if not encontrou:
         
             indiceLinhaCacheAtual += 1
+    
     if encontrou:
         
         return procCache.linhas[indiceLinhaCacheAtual]
+    
     else:
+    
         return None
 
 def buscaLinhaEmOutrasCaches(conjuntoProcCaches: ConjuntoProcessadoresCaches, tag: int, indiceProcCacheRequisitante: int) -> tuple[bool, list[LinhaCache], int]:

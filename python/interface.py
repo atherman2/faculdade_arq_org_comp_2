@@ -17,6 +17,12 @@ class Interface(CTk):
         self.memPrinc = memPrinc
         self.gerProd = gerProd
 
+        self.quantidadeInfoPorProduto = 4
+
+        self.tamanhoMp = self.memPrinc.palavrasPorBloco * self.memPrinc.quantidadeDeBlocos
+        self.intervaloEnderecoInfo = self.tamanhoMp//self.quantidadeInfoPorProduto
+        self.gerProd.maximoProdutos = self.intervaloEnderecoInfo
+
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
 
@@ -30,6 +36,44 @@ class Interface(CTk):
         frameMenu = self.framePrincipal.frameTesteMenu
         frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
         frameMenu.incluirBotaoSubframe("Remover Produto", "Remover", self.comunicaConfirmacaoRemocao)
+
+    def escrever(self, endereco, info):
+
+        arrayStringsOperacao = escreverPalavra(self.cjtoCaches, self.memPrinc, endereco, self.indiceProcCache, info)
+        
+        self.atualizarInfoEstadoCaches()
+        self.atualizarInfoEstadoMp()
+        self.atualizarLogOperacoes(arrayStringsOperacao)
+
+    def escreverVetor(self, vetorInfo):
+
+        for indiceInfo, info in enumerate(vetorInfo):
+
+            self.escrever(indiceInfo * self.intervaloEnderecoInfo, info)
+
+    def cadastroProdutoSilenciosa(self, vetorProduto: list):
+
+        indiceVetorProduto = 0
+
+        enderecoBaseProduto = self.gerProd.adicionaProduto(vetorProduto[indiceVetorProduto])
+
+        if enderecoBaseProduto in (-1, -2):
+
+            return enderecoBaseProduto
+        
+        self.informarOperacao()
+
+        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
+        vetorInfo = vetorProduto[1:].insert(1, self.indiceProcCache)
+        self.escreverVetor(vetorInfo)
+
+        return vetorProduto
+    
+    def exibirCadastro(self, retornoAdiciona):
+
+        if retornoAdiciona == -1:
+
+            pass
 
     def consultaProdutoSilenciosa(self, stringProduto):
 
@@ -46,8 +90,8 @@ class Interface(CTk):
 
             palavra, arrayStringsOperacao = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
 
-            self.atualizarLogEstadoCaches()
-            self.atualizarLogEstadoMp()
+            self.atualizarInfoEstadoCaches()
+            self.atualizarInfoEstadoMp()
             self.atualizarLogOperacoes(arrayStringsOperacao)
 
             linhasConsulta = ["Nome do Produto: " + stringProduto + "\n"]
@@ -115,7 +159,7 @@ class Interface(CTk):
         self.janelaRemocao.destroy()
         self.janelaSucessoRemocao = JanelaOperacaoBemSucedida(self, "Remoção")
 
-    def atualizarLogEstadoCaches(self):
+    def atualizarInfoEstadoCaches(self):
 
         cjtoCachesArrayStrings = self.cjtoCaches.paraArrayStrings()
 
@@ -124,7 +168,7 @@ class Interface(CTk):
 
         self.framePrincipal.frameLogCaches.adicionarLinhasTexto(cjtoCachesArrayStrings)
     
-    def atualizarLogEstadoMp(self):
+    def atualizarInfoEstadoMp(self):
 
         memPrincArrayStrings = self.memPrinc.paraArrayStrings()
 
@@ -151,8 +195,8 @@ class Interface(CTk):
 
             frame.adicionarLinhasTexto(estadoInicial)
 
-        self.atualizarLogEstadoCaches()
-        self.atualizarLogEstadoMp()
+        self.atualizarInfoEstadoCaches()
+        self.atualizarInfoEstadoMp()
 
     def informarOperacao(self):
 
