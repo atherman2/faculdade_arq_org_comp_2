@@ -454,6 +454,7 @@ def test_escrita_leitura_9(cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: Me
         [OpTeste.ESCRITA, [6, 0, 252]],
         [OpTeste.LEITURA, [4, 1]],
         [OpTeste.LEITURA, [5, 1]],
+        [OpTeste.LEITURA, [6, 1]],
         [OpTeste.LEITURA, [6, 1]]
     ])
 

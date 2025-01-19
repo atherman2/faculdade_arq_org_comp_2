@@ -24,7 +24,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     if linhaComTagCorrespondente != None:
 
         # Se a linha encontrada na cache requisitante tem estado MESIF diferente de inválido
-        if linhaComTagCorrespondente.tag in (EstadoMesif.MODIFIED, EstadoMesif.EXCLUSIVE, EstadoMesif.FORWARD, EstadoMesif.SHARED):
+        if linhaComTagCorrespondente.estadoMesif in (EstadoMesif.MODIFIED, EstadoMesif.EXCLUSIVE, EstadoMesif.FORWARD, EstadoMesif.SHARED):
 
             # Cache hit: retornar a palavra da linha da cache requisitante
             # de acordo com o seu índice
@@ -135,7 +135,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
     # Se econtrou a linha na cache requisitante
     if linhaComTagCorrespondente != None:
 
-        if linhaComTagCorrespondente.tag != EstadoMesif.INVALID:
+        if linhaComTagCorrespondente.estadoMesif != EstadoMesif.INVALID:
 
             arrayStrings.append(f"            CACHE: Hit de Escrita\n")
             
