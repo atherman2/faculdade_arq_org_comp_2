@@ -38,28 +38,39 @@ if __name__ == "__main__":
     gerenciaProdutos.maximoProdutos = 16
 
     interface = Interface(conjuntoProcCaches, memoriaPrincipal, gerenciaProdutos)
-    
-    interface.memPrinc.blocos[3].palavras[1].conteudo = 7
 
-    interface.gerProd.adicionaProduto("Banana") #0
-    interface.gerProd.adicionaProduto("Maçã") #1
-    interface.gerProd.adicionaProduto("Uva") #2
-    interface.gerProd.adicionaProduto("Abacate") #3
-    interface.gerProd.adicionaProduto("Limão") #4
-    interface.gerProd.adicionaProduto("Jaca") #5
-    interface.gerProd.adicionaProduto("Pera") #6
-    interface.gerProd.adicionaProduto("Lixia") #7
+    interface.executaOperacoesPorComando([[Operacao.CADASTRO, "Banana", 200, 2, 1, 1],
+                                          [Operacao.CADASTRO, "Maçã", 80, 3, 2, 2],
+                                          [Operacao.CADASTRO, "Uva", 40, 4, 3, 0],
+                                          [Operacao.CADASTRO, "Abacate", 15, 5, 3, 0],
+                                          [Operacao.CADASTRO, "Limão", 70, 3, 2, 1],
+                                          [Operacao.CADASTRO, "Jaca", 15, 8, 5, 1],
+                                          [Operacao.CADASTRO, "Pera", 20, 4, 3, 1],
+                                          [Operacao.CADASTRO, "Lixia", 7, 4, 2, 1]])
 
-    interface.consultaProdutoSilenciosa("Lixia")
-    interface.consultaProdutoSilenciosa("Lixia")
+    # interface.cadastroProdutoSilenciosa()
 
-    interface.framePrincipal.frameTesteMenu.mercadoAtual = 2
+    # interface.memPrinc.blocos[3].palavras[1].conteudo = 7
 
-    interface.consultaProdutoSilenciosa("Lixia")
+    # interface.gerProd.adicionaProduto("Banana") #0
+    # interface.gerProd.adicionaProduto("Maçã") #1
+    # interface.gerProd.adicionaProduto("Uva") #2
+    # interface.gerProd.adicionaProduto("Abacate") #3
+    # interface.gerProd.adicionaProduto("Limão") #4
+    # interface.gerProd.adicionaProduto("Jaca") #5
+    # interface.gerProd.adicionaProduto("Pera") #6
+    # interface.gerProd.adicionaProduto("Lixia") #7
 
-    interface.framePrincipal.frameTesteMenu.mercadoAtual = 0
+    # interface.consultaProdutoSilenciosa("Lixia")
+    # interface.consultaProdutoSilenciosa("Lixia")
 
-    interface.consultaProdutoSilenciosa("Lixia")
+    # interface.framePrincipal.frameTesteMenu.mercadoAtual = 2
+
+    # interface.consultaProdutoSilenciosa("Lixia")
+
+    # interface.framePrincipal.frameTesteMenu.mercadoAtual = 0
+
+    # interface.consultaProdutoSilenciosa("Lixia")
     
     interface.mainloop()
     

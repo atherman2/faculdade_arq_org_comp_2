@@ -57,7 +57,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             linhaSubstituicao: LinhaCache = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
 
             #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
-            trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
+            trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
             transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
@@ -82,7 +82,7 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
             linhaSubstituicao = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
             
             #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
-            trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
+            trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
             arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
             transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
@@ -144,6 +144,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
             for linha in linhasEncontradasEmOutrasCaches:
 
+                trataExclusao(linha, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
                 linha.estadoMesif = EstadoMesif.INVALID
 
             ocorreuWriteMiss = False
@@ -169,9 +170,9 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
                 
                 linhaSubstituicao = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
 
-                trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
+                trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
-                transfereLinhaEscrita(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
+                transfereLinhaEscrita(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings, conjuntoProcCaches, indiceProcCacheRequisitante)
 
                 linhaSubstituicao.palavras[indicePalavra] = novaPalavra
 
@@ -179,16 +180,18 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
                 for linha in linhasEncontradasEmOutrasCaches:
 
+                    trataExclusao(linha, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
                     linha.estadoMesif = EstadoMesif.INVALID
             
             else:
 
-                transfereLinhaEscrita(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
+                transfereLinhaEscrita(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings, conjuntoProcCaches, indiceProcCacheRequisitante)
 
                 linhaComTagCorrespondente.palavras[indicePalavra] = novaPalavra
             
             for linha in linhasEncontradasEmOutrasCaches:
 
+                trataExclusao(linha, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
                 linha.estadoMesif = EstadoMesif.INVALID
         
         else:
@@ -197,7 +200,7 @@ def escreverPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrin
 
                 linhaSubstituicao = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
 
-                trataSubstituicao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
+                trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
                 arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
                 transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
@@ -306,9 +309,9 @@ def transfereLinhaLeitura(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
         
         linhaCacheRequisitante.estadoMesif = EstadoMesif.FORWARD
     
-    linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
+        linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.SHARED
 
-def transfereLinhaEscrita(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheRequisitante: LinhaCache, tamanhoLinha, memoriaPrincipal, endereco, arrayStrings: list[str]):
+def transfereLinhaEscrita(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheRequisitante: LinhaCache, tamanhoLinha, memoriaPrincipal, endereco, arrayStrings: list[str], conjuntoProcCaches, indiceProcCacheRequisitante):
 
     copiaLinha(linhaEncontradaEmOutraCache, linhaCacheRequisitante, tamanhoLinha)
 
@@ -317,10 +320,11 @@ def transfereLinhaEscrita(linhaEncontradaEmOutraCache: LinhaCache, linhaCacheReq
         arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Escrita\n\n''')
         escreverBlocoMemoriaPrincipal(memoriaPrincipal, endereco, linhaEncontradaEmOutraCache.palavras)
     
+    trataExclusao(linhaEncontradaEmOutraCache, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
     linhaEncontradaEmOutraCache.estadoMesif = EstadoMesif.INVALID
     linhaCacheRequisitante.estadoMesif = EstadoMesif.MODIFIED
 
-def trataSubstituicao(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, indiceProcCacheRequisitante: int, arrayStrings: list[str]):
+def trataExclusao(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal: MemoriaPrincipal, indiceProcCacheRequisitante: int, arrayStrings: list[str]):
 
     if linhaSubstituicao.estadoMesif == EstadoMesif.MODIFIED:
 
@@ -330,9 +334,9 @@ def trataSubstituicao(linhaSubstituicao: LinhaCache, conjuntoProcCaches: Conjunt
     
     elif linhaSubstituicao.estadoMesif == EstadoMesif.FORWARD:
 
-        trataLinhaSubstituicaoForward(linhaSubstituicao, conjuntoProcCaches, indiceProcCacheRequisitante)
+        trataLinhaExclusaoForward(linhaSubstituicao, conjuntoProcCaches, indiceProcCacheRequisitante)
 
-def trataLinhaSubstituicaoForward(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, indiceProCacheRequisitante: int):
+def trataLinhaExclusaoForward(linhaSubstituicao: LinhaCache, conjuntoProcCaches: ConjuntoProcessadoresCaches, indiceProCacheRequisitante: int):
 
     encontrouLinhaEmOutrasCaches, linhasEncontradasEmOutrasCaches, indicesProcCaches = buscaLinhaEmOutrasCaches(conjuntoProcCaches, linhaSubstituicao.tag, indiceProCacheRequisitante)
     primeiraLinhaShared = None

@@ -2,6 +2,13 @@ from controlaSimulador import *
 from classesAplicacao import *
 from customtkinter import *
 
+class Operacao(Enum):
+
+    CADASTRO = auto()
+    CONSULTA = auto()
+    EDITAR = auto()
+    REMOVER = auto()
+
 class Interface(CTk):
 
     def __init__(self, cjtoCaches: ConjuntoProcessadoresCaches, memPrinc: MemoriaPrincipal, gerProd: GerenciaProdutos):
@@ -22,6 +29,8 @@ class Interface(CTk):
         self.tamanhoMp = self.memPrinc.palavrasPorBloco * self.memPrinc.quantidadeDeBlocos
         self.intervaloEnderecoInfo = self.tamanhoMp//self.quantidadeInfoPorProduto
         self.gerProd.maximoProdutos = self.intervaloEnderecoInfo
+        self.dicionarioExecutaOperacoes = {Operacao.CADASTRO : self.cadastraProdutoPorComando,
+                         Operacao.CONSULTA : self.consultaProdutoPorComando}
 
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
@@ -42,6 +51,7 @@ class Interface(CTk):
 
         arrayStringsOperacao = escreverPalavra(self.cjtoCaches, self.memPrinc, endereco, self.indiceProcCache, info)
         
+        self.informarOperacao()
         self.atualizarInfoEstadoCaches()
         self.atualizarInfoEstadoMp()
         self.atualizarLogOperacoes(arrayStringsOperacao)
@@ -51,6 +61,27 @@ class Interface(CTk):
         for indiceInfo, info in enumerate(vetorInfo):
 
             self.escrever(enderecoBase + indiceInfo * self.intervaloEnderecoInfo, info)
+    
+    def ler(self, endereco):
+
+        palavraLida, arrayStringsOperacao = lerPalavra(self.cjtoCaches, self.memPrinc, endereco, self.indiceProcCache)
+
+        self.informarOperacao()
+        self.atualizarInfoEstadoCaches()
+        self.atualizarInfoEstadoMp()
+        self.atualizarLogOperacoes(arrayStringsOperacao)
+
+        return palavraLida.conteudo
+
+    def lerVetor(self, enderecoBase):
+
+        vetorInfo = []
+
+        for indiceInfo in range(self.quantidadeInfoPorProduto):
+
+            vetorInfo.append(self.ler(enderecoBase + indiceInfo * self.intervaloEnderecoInfo))
+
+        return vetorInfo
 
     def cadastroProdutoSilenciosa(self, vetorProduto: list):
 
@@ -59,16 +90,18 @@ class Interface(CTk):
         if enderecoBaseProduto in (-1, -2):
 
             return enderecoBaseProduto
-        
-        self.informarOperacao()
 
-        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
         vetorInfo = vetorProduto[1:]
         vetorInfo.insert(1, self.indiceProcCache)
         self.escreverVetor(enderecoBaseProduto, vetorInfo)
 
         return vetorProduto
     
+    def cadastraProdutoPorComando(self, vetorProduto):
+
+        self.indiceProcCache = vetorProduto[-1]
+        self.cadastroProdutoSilenciosa(vetorProduto[:-1])
+
     def exibirCadastro(self, retornoAdiciona, nomeProduto):
 
         if retornoAdiciona == -1:
@@ -81,7 +114,9 @@ class Interface(CTk):
 
         else:
 
-            janelaSucesso = JanelaOperacaoBemSucedida(self, "Cadastro")
+            JanelaOperacaoBemSucedida(self, "Cadastro")
+
+            # janelaSucesso = JanelaOperacaoBemSucedida(self, "Cadastro")
             # janelaSucesso.incluirFrameTexto()
 
             # for string in retornoAdiciona:
@@ -92,6 +127,7 @@ class Interface(CTk):
     
     def comunicaCadastro(self):
 
+        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
         vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Cadastrar Produto"].getParesCadastros()
         self.exibirCadastro(self.cadastroProdutoSilenciosa(vetorProduto), vetorProduto[0])
 
@@ -100,22 +136,23 @@ class Interface(CTk):
         #TODO: pesquisar todas as infos produto
         #TODO: terminar
 
-        enderecoProduto = self.gerProd.consultaProduto(stringProduto)
+        enderecoBaseProduto = self.gerProd.consultaProduto(stringProduto)
 
-        if enderecoProduto != None:
+        if enderecoBaseProduto != None:
 
-            self.informarOperacao()
+            arrayProduto = self.lerVetor(enderecoBaseProduto)
 
-            indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
+            linhasConsulta = [f"Nome do Produto: {stringProduto}\n"]
+            linhasConsulta += [f"Quantidade em estoque: {str(arrayProduto[0])}\n"]
+            linhasConsulta += [f"Preço: {str(arrayProduto[2])}\n"]
+            linhasConsulta += [f"Custo no fornecedor: {str(arrayProduto[3])}\n"]
+            if self.indiceProcCache == arrayProduto[1]:
 
-            palavra, arrayStringsOperacao = lerPalavra(self.cjtoCaches, self.memPrinc, enderecoProduto, indiceProcCache)
+                linhasConsulta += [f"O produto se encontra no seu mercado! (Mercado {arrayProduto[1] + 1})"]
+            
+            else:
 
-            self.atualizarInfoEstadoCaches()
-            self.atualizarInfoEstadoMp()
-            self.atualizarLogOperacoes(arrayStringsOperacao)
-
-            linhasConsulta = ["Nome do Produto: " + stringProduto + "\n"]
-            linhasConsulta += ["Quantidade em estoque: " + str(palavra.conteudo) + "\n"]
+                linhasConsulta += [f"O produto encontra-se em outro mercado! (Mercado {arrayProduto[1] + 1})"]
         
         else:
 
@@ -123,6 +160,17 @@ class Interface(CTk):
 
         return linhasConsulta
     
+    def consultaProdutoPorComando(self, vetorProduto):
+
+        self.indiceProcCache = vetorProduto[-1]
+        self.consultarProduto(vetorProduto[:-1])
+
+    def executaOperacoesPorComando(self, vetorOperacoes):
+
+        for operacao in vetorOperacoes:
+
+            self.dicionarioExecutaOperacoes[operacao[0]](operacao[1:])
+
     def exibirConsulta(self, linhasConsulta):
         
         if linhasConsulta == ["Produto não encontrado!\n"]:
@@ -144,6 +192,7 @@ class Interface(CTk):
 
     def comunicaConsulta(self):
 
+        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
         stringProduto = self.framePrincipal.frameTesteMenu.subFrames["Consultar Produto"].getParesCadastros()[0]
         self.consultarProduto(stringProduto)
 
@@ -170,6 +219,7 @@ class Interface(CTk):
 
     def comunicaConfirmacaoRemocao(self):
 
+        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
         stringProduto =  self.framePrincipal.frameTesteMenu.subFrames["Remover Produto"].getParesCadastros()[0]
         self.confirmacaoRemocaoProduto(stringProduto)
 
