@@ -29,8 +29,11 @@ class Interface(CTk):
         self.tamanhoMp = self.memPrinc.palavrasPorBloco * self.memPrinc.quantidadeDeBlocos
         self.intervaloEnderecoInfo = self.tamanhoMp//self.quantidadeInfoPorProduto
         self.gerProd.maximoProdutos = self.intervaloEnderecoInfo
-        self.dicionarioExecutaOperacoes = {Operacao.CADASTRO : self.cadastraProdutoPorComando,
-                         Operacao.CONSULTA : self.consultaProdutoPorComando}
+        self.dicionarioExecutaOperacoes = {
+            Operacao.CADASTRO: self.cadastraProdutoPorComando,
+            Operacao.CONSULTA: self.consultaProdutoPorComando,
+            Operacao.EDITAR: self.editaProdutoPorComando
+        }
 
         self.framePrincipal = FrameComScroll(self)
         self.framePrincipal.grid(row=0, column=0, sticky="snew")
@@ -45,6 +48,7 @@ class Interface(CTk):
         frameMenu = self.framePrincipal.frameTesteMenu
         frameMenu.incluirBotaoSubframe("Cadastrar Produto", "Cadastrar", self.comunicaCadastro)
         frameMenu.incluirBotaoSubframe("Consultar Produto", "Consultar", self.comunicaConsulta)
+        frameMenu.incluirBotaoSubframe("Editar Produto", "Editar", self.comunicaEdicao)
         frameMenu.incluirBotaoSubframe("Remover Produto", "Remover", self.comunicaConfirmacaoRemocao)
 
     def escrever(self, endereco, info):
@@ -83,7 +87,7 @@ class Interface(CTk):
 
         return vetorInfo
 
-    def cadastroProdutoSilenciosa(self, vetorProduto: list):
+    def cadastroProdutoSilencioso(self, vetorProduto: list):
 
         enderecoBaseProduto = self.gerProd.adicionaProduto(vetorProduto[0])
 
@@ -100,7 +104,7 @@ class Interface(CTk):
     def cadastraProdutoPorComando(self, vetorProduto):
 
         self.indiceProcCache = vetorProduto[-1]
-        self.cadastroProdutoSilenciosa(vetorProduto[:-1])
+        self.cadastroProdutoSilencioso(vetorProduto[:-1])
 
     def exibirCadastro(self, retornoAdiciona, nomeProduto):
 
@@ -115,26 +119,14 @@ class Interface(CTk):
         else:
 
             JanelaOperacaoBemSucedida(self, "Cadastro")
-
-            # janelaSucesso = JanelaOperacaoBemSucedida(self, "Cadastro")
-            # janelaSucesso.incluirFrameTexto()
-
-            # for string in retornoAdiciona:
-            
-            #     string += "\n"
-            
-            # janelaSucesso.frameTexto.adicionarLinhasTexto(retornoAdiciona)
     
     def comunicaCadastro(self):
 
         self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
-        vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Cadastrar Produto"].getParesCadastros()
-        self.exibirCadastro(self.cadastroProdutoSilenciosa(vetorProduto), vetorProduto[0])
+        vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Cadastrar Produto"].getParesCadastro()
+        self.exibirCadastro(self.cadastroProdutoSilencioso(vetorProduto), vetorProduto[0])
 
     def consultaProdutoSilenciosa(self, stringProduto):
-
-        #TODO: pesquisar todas as infos produto
-        #TODO: terminar
 
         enderecoBaseProduto = self.gerProd.consultaProduto(stringProduto)
 
@@ -175,9 +167,7 @@ class Interface(CTk):
         
         if linhasConsulta == ["Produto não encontrado!\n"]:
 
-            self.janelaProdutoNaoEncontrado = JanelaProdutoNaoEncontrado(self)
-            self.janelaProdutoNaoEncontrado.adicionarFrameBotoes()
-            self.janelaProdutoNaoEncontrado.frameBotoes.adicionarBotao("Ok", self.janelaProdutoNaoEncontrado.destroy)
+            JanelaProdutoNaoEncontrado(self)
 
         else:
             
@@ -193,16 +183,51 @@ class Interface(CTk):
     def comunicaConsulta(self):
 
         self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
-        stringProduto = self.framePrincipal.frameTesteMenu.subFrames["Consultar Produto"].getParesCadastros()[0]
+        stringProduto = self.framePrincipal.frameTesteMenu.subFrames["Consultar Produto"].getParesCadastro()[0]
         self.consultarProduto(stringProduto)
+
+    def edicaoProdutoSilenciosa(self, vetorProduto: list):
+
+        enderecoBaseProduto = self.gerProd.consultaProduto(vetorProduto[0])
+
+        if enderecoBaseProduto == None:
+
+            return None
+        
+        else:
+
+            vetorInfo = vetorProduto[1:]
+            vetorInfo.insert(1, self.indiceProcCache)
+            self.escreverVetor(enderecoBaseProduto, vetorInfo)
+            
+            return vetorProduto
+    
+    def editaProdutoPorComando(self, vetorProduto):
+
+        self.indiceProcCache = vetorProduto[-1]
+        self.cadastroProdutoSilencioso(vetorProduto[:-1])
+
+    def exibirEdicao(self, retornoEdita):
+
+        if retornoEdita == None:
+
+            JanelaProdutoNaoEncontrado(self)
+        
+        else:
+
+            JanelaOperacaoBemSucedida(self, "Edição")
+
+    def comunicaEdicao(self):
+
+        self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
+        vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Editar Produto"].getParesCadastro()
+        self.exibirEdicao(self.edicaoProdutoSilenciosa(vetorProduto))
 
     def exibirConfirmacaoRemocao(self, stringProduto, linhasInfoProduto):
 
         if linhasInfoProduto == ["Produto não encontrado!\n"]:
 
-            self.janelaProdutoNaoEncontrado = JanelaProdutoNaoEncontrado(self)
-            self.janelaProdutoNaoEncontrado.adicionarFrameBotoes()
-            self.janelaProdutoNaoEncontrado.frameBotoes.adicionarBotao("Ok", self.janelaProdutoNaoEncontrado.destroy)
+            JanelaProdutoNaoEncontrado(self)
 
         else:
 
@@ -220,7 +245,7 @@ class Interface(CTk):
     def comunicaConfirmacaoRemocao(self):
 
         self.indiceProcCache = self.framePrincipal.frameTesteMenu.mercadoAtual
-        stringProduto =  self.framePrincipal.frameTesteMenu.subFrames["Remover Produto"].getParesCadastros()[0]
+        stringProduto =  self.framePrincipal.frameTesteMenu.subFrames["Remover Produto"].getParesCadastro()[0]
         self.confirmacaoRemocaoProduto(stringProduto)
 
     def removeProduto(self):
@@ -445,7 +470,7 @@ class FrameComEntradas(CTkFrame):
         self.subFramesParCadastro[-1].grid(row=self.indiceComponent, column=0, sticky="ew")
         self.indiceComponent += 1
     
-    def getParesCadastros(self):
+    def getParesCadastro(self):
 
         retorno = []
         for subFrameParCadastro in self.subFramesParCadastro:
@@ -531,6 +556,24 @@ def criaSubFrameEditar(framePai: FrameComMenu):
 
     subFrameEditar.adicionarSubFrameParCadastro()
     subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Nome do\nProduto:")
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
+
+    indiceEntradas += 1
+    
+    subFrameEditar.adicionarSubFrameParCadastro()
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Quantidade\nem estoque:")
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
+
+    indiceEntradas += 1
+    
+    subFrameEditar.adicionarSubFrameParCadastro()
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Custo\nno fornecedor:")
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
+
+    indiceEntradas += 1
+    
+    subFrameEditar.adicionarSubFrameParCadastro()
+    subFrameEditar.subFramesParCadastro[indiceEntradas].incluirRotulo("Preço:")
     subFrameEditar.subFramesParCadastro[indiceEntradas].incluirEntrada(indiceEntradas)
 
     return subFrameEditar
@@ -633,6 +676,8 @@ class JanelaProdutoNaoEncontrado(JanelaSecundaria):
         super().__init__(pai)
         self.setTitulo("Erro")
         self.adicionarRotulo("Produto não encontrado!")
+        self.adicionarFrameBotoes()
+        self.frameBotoes.adicionarBotao("Ok", self.destroy)
 
 class JanelaOperacaoBemSucedida(JanelaSecundaria):
 
