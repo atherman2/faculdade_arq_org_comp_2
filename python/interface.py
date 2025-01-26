@@ -32,7 +32,8 @@ class Interface(CTk):
         self.dicionarioExecutaOperacoes = {
             Operacao.CADASTRO: self.cadastraProdutoPorComando,
             Operacao.CONSULTA: self.consultaProdutoPorComando,
-            Operacao.EDITAR: self.editaProdutoPorComando
+            Operacao.EDITAR: self.editaProdutoPorComando,
+            Operacao.REMOVER : self.removeProdutoPorComando
         }
 
         self.framePrincipal = FrameComScroll(self)
@@ -276,6 +277,14 @@ class Interface(CTk):
         self.gerProd.removeProduto(self.stringProdutoRemocao)
         self.janelaRemocao.destroy()
         self.janelaSucessoRemocao = JanelaOperacaoBemSucedida(self, "Remoção")
+
+    def removeProdutoPorComando(self, vetorProduto):
+
+        self.indiceProcCache = vetorProduto[-1]
+        retornoConsulta = self.consultaProdutoParaRemocaoSilenciosa(self, vetorProduto[0])
+        if retornoConsulta != ["Produto não encontrado!\n"]:
+
+            self.gerProd.removeProduto(vetorProduto[0])
 
     def atualizarInfoEstadoCaches(self):
 
