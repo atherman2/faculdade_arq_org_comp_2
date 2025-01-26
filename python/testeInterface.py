@@ -21,18 +21,10 @@ if __name__ == "__main__":
     memoriaPrincipal.constroi()
 
     conjuntoProcCaches.quantidadeProcCaches = QUANTIDADE_CACHES
+    conjuntoProcCaches.intervalorAleatoriedadePalavras = INTERVALO_ALEATORIEDADE
+    conjuntoProcCaches.palavrasPorLinha = QUANTIDADE_PALAVRAS
+    conjuntoProcCaches.linhasPorProcCache = QUANTIDADE_LINHAS
     conjuntoProcCaches.constroi()
-
-    indiceProcCacheAtual = 0
-    while indiceProcCacheAtual < QUANTIDADE_CACHES:
-
-        procCacheAtual = conjuntoProcCaches.procCaches[indiceProcCacheAtual]
-        procCacheAtual.intervaloAleatoriedadePalavras = INTERVALO_ALEATORIEDADE
-        procCacheAtual.palavrasPorLinha = QUANTIDADE_PALAVRAS
-        procCacheAtual.quantidadeDeLinhas = QUANTIDADE_LINHAS
-        procCacheAtual.constroi()
-
-        indiceProcCacheAtual += 1
     
     gerenciaProdutos = GerenciaProdutos()
     gerenciaProdutos.maximoProdutos = 16

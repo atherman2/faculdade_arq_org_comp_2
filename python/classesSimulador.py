@@ -64,6 +64,9 @@ class ConjuntoProcessadoresCaches:
     def __init__(self):
         
         self.quantidadeProcCaches = 0
+        self.intervalorAleatoriedadePalavras = 0
+        self.palavrasPorLinha = 0
+        self.linhasPorProcCache = 0
         self.procCaches = None
     
     def constroi(self):
@@ -73,6 +76,14 @@ class ConjuntoProcessadoresCaches:
         while indiceProcCacheAtual < self.quantidadeProcCaches:
 
             self.procCaches.append(ProcessadorCache())
+            procCacheAtual = self.procCaches[indiceProcCacheAtual]
+
+            procCacheAtual.intervaloAleatoriedadePalavras = self.intervalorAleatoriedadePalavras
+            procCacheAtual.palavrasPorLinha = self.palavrasPorLinha
+            procCacheAtual.quantidadeDeLinhas = self.linhasPorProcCache
+
+            procCacheAtual.constroi()
+
             indiceProcCacheAtual += 1
     
     def paraArrayStrings(self):
