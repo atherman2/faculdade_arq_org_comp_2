@@ -223,6 +223,32 @@ class Interface(CTk):
         vetorProduto = self.framePrincipal.frameTesteMenu.subFrames["Editar Produto"].getParesCadastro()
         self.exibirEdicao(self.edicaoProdutoSilenciosa(vetorProduto))
 
+    def consultaProdutoParaRemocaoSilenciosa(self, stringProduto):
+
+        enderecoBaseProduto = self.gerProd.consultaProduto(stringProduto)
+
+        if enderecoBaseProduto != None:
+
+            arrayProduto = self.lerVetor(enderecoBaseProduto)
+
+            linhasConsulta = [f"Nome do Produto: {stringProduto}\n"]
+            linhasConsulta += [f"Quantidade em estoque: {str(arrayProduto[0])}\n"]
+            linhasConsulta += [f"Preço: {str(arrayProduto[2])}\n"]
+            linhasConsulta += [f"Custo no fornecedor: {str(arrayProduto[3])}\n"]
+            if self.indiceProcCache == arrayProduto[1]:
+
+                linhasConsulta += [f"O produto se encontra no seu mercado! (Mercado {arrayProduto[1] + 1})"]
+            
+            else:
+
+                linhasConsulta += [f"O produto encontra-se em outro mercado! (Mercado {arrayProduto[1] + 1})"]
+        
+        else:
+
+            linhasConsulta = ["Produto não encontrado!\n"]
+
+        return linhasConsulta
+
     def exibirConfirmacaoRemocao(self, stringProduto, linhasInfoProduto):
 
         if linhasInfoProduto == ["Produto não encontrado!\n"]:
@@ -232,15 +258,12 @@ class Interface(CTk):
         else:
 
             self.stringProdutoRemocao = stringProduto
-            self.janelaRemocao = JanelaExibirRemocao(self)
-            self.janelaRemocao.adicionarLinhasTexto(linhasInfoProduto)
-            self.janelaRemocao.adicionarFrameBotoes()
-            self.janelaRemocao.frameBotoes.adicionarBotao("Cancelar", self.janelaRemocao.destroy)
+            self.janelaRemocao = JanelaExibirRemocao(self, linhasInfoProduto)
             self.janelaRemocao.frameBotoes.adicionarBotao("Remover", self.removeProduto)
 
     def confirmacaoRemocaoProduto(self, stringProduto):
 
-        self.exibirConfirmacaoRemocao(stringProduto, self.consultaProdutoSilenciosa(stringProduto))
+        self.exibirConfirmacaoRemocao(stringProduto, self.consultaProdutoParaRemocaoSilenciosa(stringProduto))
 
     def comunicaConfirmacaoRemocao(self):
 
@@ -662,12 +685,15 @@ class JanelaExibirConsulta(JanelaSecundaria):
 
 class JanelaExibirRemocao(JanelaSecundaria):
 
-    def __init__(self, pai):
+    def __init__(self, pai, linhasInfoProduto):
 
         super().__init__(pai)
         self.setTitulo("Remoção de Produto")
         self.adicionarRotulo("Deseja remover este produto?")
         self.incluirFrameTexto()
+        self.adicionarLinhasTexto(linhasInfoProduto)
+        self.adicionarFrameBotoes()
+        self.frameBotoes.adicionarBotao("Cancelar", self.destroy)
 
 class JanelaProdutoNaoEncontrado(JanelaSecundaria):
 

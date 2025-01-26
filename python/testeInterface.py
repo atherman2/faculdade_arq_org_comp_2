@@ -47,30 +47,6 @@ if __name__ == "__main__":
                                           [Operacao.CADASTRO, "Jaca", 15, 8, 5, 1],
                                           [Operacao.CADASTRO, "Pera", 20, 4, 3, 1],
                                           [Operacao.CADASTRO, "Lixia", 7, 4, 2, 1]])
-
-    # interface.cadastroProdutoSilenciosa()
-
-    # interface.memPrinc.blocos[3].palavras[1].conteudo = 7
-
-    # interface.gerProd.adicionaProduto("Banana") #0
-    # interface.gerProd.adicionaProduto("Maçã") #1
-    # interface.gerProd.adicionaProduto("Uva") #2
-    # interface.gerProd.adicionaProduto("Abacate") #3
-    # interface.gerProd.adicionaProduto("Limão") #4
-    # interface.gerProd.adicionaProduto("Jaca") #5
-    # interface.gerProd.adicionaProduto("Pera") #6
-    # interface.gerProd.adicionaProduto("Lixia") #7
-
-    # interface.consultaProdutoSilenciosa("Lixia")
-    # interface.consultaProdutoSilenciosa("Lixia")
-
-    # interface.framePrincipal.frameTesteMenu.mercadoAtual = 2
-
-    # interface.consultaProdutoSilenciosa("Lixia")
-
-    # interface.framePrincipal.frameTesteMenu.mercadoAtual = 0
-
-    # interface.consultaProdutoSilenciosa("Lixia")
     
     interface.mainloop()
     
