@@ -10,7 +10,7 @@ if __name__ == "__main__":
     QUANTIDADE_CACHES = 4
     QUANTIDADE_LINHAS = 8
 
-    QUANTIDADE_BLOCOS = 32
+    QUANTIDADE_BLOCOS = 64
     
     INTERVALO_ALEATORIEDADE = Intervalo(0, 999)
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
                                           [Operacao.CADASTRO, "Limão", 70, 3, 2, 1],
                                           [Operacao.CADASTRO, "Jaca", 15, 8, 5, 1],
                                           [Operacao.CADASTRO, "Pera", 20, 4, 3, 1],
-                                          [Operacao.CADASTRO, "Lixia", 7, 4, 2, 1]])
+                                          [Operacao.CADASTRO, "Lichia", 7, 4, 2, 1]])
     
     interface.mainloop()
     
