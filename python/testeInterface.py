@@ -8,7 +8,7 @@ if __name__ == "__main__":
     QUANTIDADE_PALAVRAS = 2
 
     QUANTIDADE_CACHES = 4
-    QUANTIDADE_LINHAS = 2
+    QUANTIDADE_LINHAS = 8
 
     QUANTIDADE_BLOCOS = 32
     

@@ -12,10 +12,14 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     tag = endereco//palavrasPorLinha
     indicePalavra = endereco % palavrasPorLinha
 
+    # Informa as informações de leitura
+
     arrayStrings.append(f"LEITURA: iniciando leitura\n")
     arrayStrings.append(f"do endereço {endereco}\n")
     arrayStrings.append(f"de tag {tag}\n")
     arrayStrings.append(f"requisitada pela cache {indiceProcCacheRequisitante + 1}\n\n")
+
+    # Define a cache que requisita de acordo com o índice informado e busca a linha de acordo com a tag calculada
 
     procCacheRequisitante: ProcessadorCache = conjuntoProcCaches.procCaches[indiceProcCacheRequisitante]
     linhaComTagCorrespondente: LinhaCache = buscaLinhaCache(procCacheRequisitante, tag)
@@ -36,10 +40,14 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
     
     # Se não saiu da função pelo return, então significa que não houve Cache Hit, logo deve-se
     # procurar em outras caches
-    # TODO: Exibir Cache Miss
+
     arrayStrings.append(f'''            CACHE: Miss de Leitura\n''')
     encontrouLinhaEmOutraCache, linhasEncontradasEmOutrasCaches, indicesProcCachesOutrasLinhas = buscaLinhaEmOutrasCaches(conjuntoProcCaches, tag, indiceProcCacheRequisitante)
     
+    # linhasEncontradasEmOutrasCaches contém todas as linhas de outras caches com a mesma tag
+    # a tarefa agora é verificar, dentre estas linhas, se há uma linha exclusiva, modificada,
+    # ou forward
+
     estadoNaOutraCache = EstadoMesif.NOTFOUND
     for linha in linhasEncontradasEmOutrasCaches:
     
@@ -54,22 +62,34 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
         # Se não havia encontrado linha na cache requisitante (substituir uma linha existente ou adicionar linha)
         if linhaComTagCorrespondente == None:
 
+            # Obtém qual linha será substituída
             linhaSubstituicao: LinhaCache = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
 
-            #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
+            # Trata a substituição da linha que será substituída
+            # Isto é, toma as devidas providências caso a linha esteja em estado forward ou modificado
+            # (ver comentários na função trataExclusao)
             trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
+            # Transfere as palavras da linha da outra cache para a linha da cache requisitante - a que acabou-se de substituir
+            # Além disso, faz a lógica de qual linha ficará no estado forward
+            # (ver comentários na função transfereLinhaLeitura)
             transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
+            # Obtém a palavra do endereço desejado de acordo com o índice previamente calculado
             palavraLida = linhaSubstituicao.palavras[indicePalavra]
 
+            # Atualiza o índice de substituição para manter a lógica de substituição FIFO
             atualizaIndiceDeSubstituicao(procCacheRequisitante)
 
         # Se havia encontrado uma linha na cache requisitante, porém esta linha estava em estado inválido
         else:
 
+            # Transfere as palavras da linha da outra cache para a linha da cache requisitante - a que acabou-se de substituir
+            # Além disso, faz a lógica de qual linha ficará no estado forward
+            # (ver comentários na função transfereLinhaLeitura)
             transfereLinhaLeitura(linhaEncontradaEmOutraCache, linhaComTagCorrespondente, procCacheRequisitante.palavrasPorLinha, memoriaPrincipal, endereco, arrayStrings)
 
+            # Obtém a palavra do endereço desejado de acordo com o índice previamente calculado
             palavraLida = linhaComTagCorrespondente.palavras[indicePalavra]
         
     else:
@@ -79,11 +99,15 @@ def lerPalavra(conjuntoProcCaches: ConjuntoProcessadoresCaches, memoriaPrincipal
         # Se não havia encontrado linha na cache requisitante (substituir uma linha existente ou adicionar linha)
         if linhaComTagCorrespondente == None:
 
+            # Obtém qual linha será substituída
             linhaSubstituicao = procCacheRequisitante.linhas[procCacheRequisitante.indiceSubstituicao]
             
-            #XTODO: tratar linha a ser substituída ter estado Forward ou Modificado
+            # Trata a substituição da linha que será substituída
+            # Isto é, toma as devidas providências caso a linha esteja em estado forward ou modificado
+            # (ver comentários na função trataExclusao)
             trataExclusao(linhaSubstituicao, conjuntoProcCaches, memoriaPrincipal, indiceProcCacheRequisitante, arrayStrings)
 
+            # Necessária leitura à memória principal, já que 
             arrayStrings.append(f'''            MEMÓRIA PRINCIPAL: Leitura\n\n''')
             transfereBlocoParaLinha(memoriaPrincipal, endereco, linhaSubstituicao, procCacheRequisitante.palavrasPorLinha)
             
